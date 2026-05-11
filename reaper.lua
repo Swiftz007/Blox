@@ -108,6 +108,130 @@ Settings = Window:AddTab({ Title = "Settings", Icon = "settings" })
 
 
 -- Function Auto Farm
+--=========================
+-- 🔥 SETTINGS & VARIABLES (เพิ่มต่อจากบรรทัดแรกๆ)
+--=========================
+_G.AutoLevel = false
+_G.BringMob = true
+_G.FastAttack = true
+_G.SelectWeapon = "Melee" -- ค่าเริ่มต้น
+
+local NameQuest, QuestLv, Ms, CFrameQ, CFrameMon, NameMon
+local bringmob = false
+
+--=========================
+-- 🛠 UTILITY FUNCTIONS
+--=========================
+local function Tween(Target)
+    if not Target then return end
+    local dist = (Target.Position - player.Character.HumanoidRootPart.Position).Magnitude
+    local speed = 350
+    local info = TweenInfo.new(dist / speed, Enum.EasingStyle.Linear)
+    local tween = TweenService:Create(player.Character.HumanoidRootPart, info, {CFrame = Target})
+    tween:Play()
+end
+
+local function Attack()
+    local VirtualUser = game:GetService("VirtualUser")
+    VirtualUser:CaptureController()
+    VirtualUser:ClickButton1(Vector2.new(851, 158))
+end
+
+--=========================
+-- 📜 QUEST LOGIC (นำไปขยายต่อตาม List ของคุณ)
+--=========================
+function CheckLevel()
+    local lv = player.Data.Level.Value
+    if lv >= 0 and lv <= 14 then
+        NameQuest = "BanditQuest1" QuestLv = 1 Ms = "Bandit" NameMon = "Bandit"
+        CFrameQ = CFrame.new(1059.3, 15.4, 1549.1)
+        CFrameMon = CFrame.new(1145, 17, 1634)
+    elseif lv >= 15 and lv <= 29 then
+        NameQuest = "JungleQuest" QuestLv = 1 Ms = "Monkey" NameMon = "Monkey"
+        CFrameQ = CFrame.new(-1598, 35, 153)
+        CFrameMon = CFrame.new(-1622, 35, 150)
+    -- เพิ่มเกาะอื่นๆ ตรงนี้...
+    end
+end
+
+--=========================
+-- 🖱 MAIN TAB UI (เพิ่มเข้าใน Tabs.Main)
+--=========================
+local ToggleFarm = Tabs.Main:AddToggle("AutoLevel", {Title = "Auto Farm", Default = false})
+ToggleFarm:OnChanged(function(Value)
+    _G.AutoLevel = Value
+end)
+
+local ToggleBring = Tabs.Main:AddToggle("BringMob", {Title = "Bring Mob", Default = true})
+ToggleBring:OnChanged(function(Value)
+    _G.BringMob = Value
+end)
+
+local WeaponDropdown = Tabs.Main:AddDropdown("Weapon", {
+    Title = "Select Weapon",
+    Values = {"Melee", "Sword", "Fruit"},
+    Default = "Melee",
+})
+WeaponDropdown:OnChanged(function(Value)
+    _G.SelectWeapon = Value
+end)
+
+--=========================
+-- 🔄 CORE LOOPS
+--=========================
+
+-- Loop: Auto Quest & Tween
+task.spawn(function()
+    while task.wait() do
+        if _G.AutoLevel then
+            pcall(function()
+                CheckLevel()
+                local questVisible = player.PlayerGui.Main.Quest.Visible
+                
+                if not questVisible then
+                    bringmob = false
+                    Tween(CFrameQ)
+                    if (CFrameQ.Position - player.Character.HumanoidRootPart.Position).Magnitude <= 10 then
+                        game:GetService("ReplicatedStorage").Remotes.CommF_:InvokeServer("StartQuest", NameQuest, QuestLv)
+                    end
+                else
+                    bringmob = true
+                    local enemy = workspace.Enemies:FindFirstChild(Ms) or workspace.Enemies:FindFirstChild(NameMon)
+                    if enemy and enemy:FindFirstChild("Humanoid") and enemy.Humanoid.Health > 0 then
+                        -- ติดตั้งอาวุธ
+                        for _, v in pairs(player.Backpack:GetChildren()) do
+                            if v:IsA("Tool") and v.ToolTip == _G.SelectWeapon then
+                                player.Character.Humanoid:EquipTool(v)
+                            end
+                        end
+                        -- ล็อคตำแหน่งเหนือมอนสเตอร์
+                        player.Character.HumanoidRootPart.CFrame = enemy.HumanoidRootPart.CFrame * CFrame.new(0, 12, 0)
+                        Attack()
+                    else
+                        Tween(CFrameMon) -- ไปจุดเกิดมอน
+                    end
+                end
+            end)
+        end
+    end
+end)
+
+-- Loop: Bring Mob & Hitbox (ใช้ Heartbeat เพื่อความลื่นไหล)
+RunService.Heartbeat:Connect(function()
+    if _G.AutoLevel and _G.BringMob and bringmob then
+        pcall(function()
+            for _, v in pairs(workspace.Enemies:GetChildren()) do
+                if v.Name == Ms and v:FindFirstChild("HumanoidRootPart") and v.Humanoid.Health > 0 then
+                    v.HumanoidRootPart.CanCollide = false
+                    v.HumanoidRootPart.Size = Vector3.new(50, 50, 50)
+                    v.HumanoidRootPart.CFrame = player.Character.HumanoidRootPart.CFrame * CFrame.new(0, -12, 0)
+                    v.HumanoidRootPart.Velocity = Vector3.new(0, 0, 0)
+                    sethiddenproperty(player, "SimulationRadius", math.huge)
+                end
+            end
+        end)
+    end
+end)
 
 
 

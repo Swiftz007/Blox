@@ -13,6 +13,7 @@ local TweenService = game:GetService("TweenService")
 
 local Sea1 = game.PlaceId == 2753915549
 local Sea2 = game.PlaceId == 4442272160
+local Sea3 = game.PlaceId == 7449423635 
 
 -- ระบบป้องกันการถูกเตะ (Anti-AFK)
 player.Idled:Connect(function()
@@ -401,6 +402,92 @@ function CheckLevel()
             NameQuest = "ForgottenQuest" QuestLv = 2 Ms = "Water Tiger" NameMon = "Water Tiger"
             CFrameQ = CFrame.new(-3055.22, 235.54, -10142.12)
             CFrameMon = CFrame.new(-3125.53, 15.63, -10512.42)
+        end
+                elseif Sea3 then
+        if MyLevel >= 1500 and MyLevel <= 1524 then
+            NameQuest = "PortTownQuest" QuestLv = 1 Ms = "Pirate Millionaire" NameMon = "Pirate Millionaire"
+            CFrameQ = CFrame.new(-290.07, 7.39, 5328.19)
+            CFrameMon = CFrame.new(-338.53, 73.12, 5542.42)
+        elseif MyLevel >= 1525 and MyLevel <= 1574 then
+            NameQuest = "PortTownQuest" QuestLv = 2 Ms = "Pistol Billionaire" NameMon = "Pistol Billionaire"
+            CFrameQ = CFrame.new(-290.07, 7.39, 5328.19)
+            CFrameMon = CFrame.new(-588.42, 73.12, 5352.12)
+        elseif MyLevel >= 1575 and MyLevel <= 1599 then
+            NameQuest = "HydraIslandQuest" QuestLv = 1 Ms = "Dragon Crew Warrior" NameMon = "Dragon Crew Warrior"
+            CFrameQ = CFrame.new(5463.42, 601.32, 171.42)
+            CFrameMon = CFrame.new(5721.43, 601.32, -5.22)
+        elseif MyLevel >= 1600 and MyLevel <= 1649 then
+            NameQuest = "HydraIslandQuest" QuestLv = 2 Ms = "Dragon Crew Archer" NameMon = "Dragon Crew Archer"
+            CFrameQ = CFrame.new(5463.42, 601.32, 171.42)
+            CFrameMon = CFrame.new(6582.42, 601.32, -125.43)
+        elseif MyLevel >= 1650 and MyLevel <= 1699 then
+            NameQuest = "GreatTreeQuest" QuestLv = 1 Ms = "Female Island Marine" NameMon = "Female Island Marine"
+            CFrameQ = CFrame.new(4062.12, 72.43, -1714.23)
+            CFrameMon = CFrame.new(4652.42, 72.43, -1684.21)
+        elseif MyLevel >= 1700 and MyLevel <= 1749 then
+            NameQuest = "GreatTreeQuest" QuestLv = 2 Ms = "Giant Island Marine" NameMon = "Giant Island Marine"
+            CFrameQ = CFrame.new(4062.12, 72.43, -1714.23)
+            CFrameMon = CFrame.new(5125.53, 72.43, -2312.43)
+        elseif MyLevel >= 1750 and MyLevel <= 1799 then
+            NameQuest = "TurtleQuest" QuestLv = 1 Ms = "Fishman Raider" NameMon = "Fishman Raider"
+            CFrameQ = CFrame.new(-13125.42, 514.43, -7542.42)
+            CFrameMon = CFrame.new(-13342.12, 514.43, -7912.43)
+        elseif MyLevel >= 1800 and MyLevel <= 1849 then
+            NameQuest = "TurtleQuest" QuestLv = 2 Ms = "Fishman Captain" NameMon = "Fishman Captain"
+            CFrameQ = CFrame.new(-13125.42, 514.43, -7542.42)
+            CFrameMon = CFrame.new(-13425.53, 514.43, -8312.43)
+        elseif MyLevel >= 1850 and MyLevel <= 1899 then
+            NameQuest = "TurtleQuest" QuestLv = 3 Ms = "Forest Pirate" NameMon = "Forest Pirate"
+            CFrameQ = CFrame.new(-13125.42, 514.43, -7542.42)
+            CFrameMon = CFrame.new(-13312.42, 514.43, -7512.43)
+        elseif MyLevel >= 1900 and MyLevel <= 1949 then
+            NameQuest = "TurtleQuest" QuestLv = 4 Ms = "Mythical Pirate" NameMon = "Mythical Pirate"
+            CFrameQ = CFrame.new(-13125.42, 514.43, -7542.42)
+            CFrameMon = CFrame.new(-13512.42, 514.43, -7125.42)
+        elseif MyLevel >= 1950 and MyLevel <= 1999 then
+            NameQuest = "HauntedQuest1" QuestLv = 1 Ms = "Reborn Skeleton" NameMon = "Reborn Skeleton"
+            CFrameQ = CFrame.new(-9485.42, 142.12, 5565.42)
+            CFrameMon = CFrame.new(-8742.42, 142.12, 6012.43)
+        elseif MyLevel >= 2000 and MyLevel <= 2049 then
+            NameQuest = "HauntedQuest1" QuestLv = 2 Ms = "Living Zombie" NameMon = "Living Zombie"
+            CFrameQ = CFrame.new(-9485.42, 142.12, 5565.42)
+            CFrameMon = CFrame.new(-10124.42, 142.12, 6125.42)
+        elseif MyLevel >= 2050 and MyLevel <= 2099 then
+            NameQuest = "HauntedQuest2" QuestLv = 1 Ms = "Demonic Soul" NameMon = "Demonic Soul"
+            CFrameQ = CFrame.new(-9525.42, 164.21, 5742.12)
+            CFrameMon = CFrame.new(-9612.42, 164.21, 6012.43)
+        elseif MyLevel >= 2100 and MyLevel <= 2149 then
+            NameQuest = "IceCreamIslandQuest" QuestLv = 1 Ms = "Peanut Scout" NameMon = "Peanut Scout"
+            CFrameQ = CFrame.new(-1152.12, 15.63, -12124.42)
+            CFrameMon = CFrame.new(-1242.42, 15.63, -12412.43)
+        elseif MyLevel >= 2150 and MyLevel <= 2199 then
+            NameQuest = "IceCreamIslandQuest" QuestLv = 2 Ms = "Peanut President" NameMon = "Peanut President"
+            CFrameQ = CFrame.new(-1152.12, 15.63, -12124.42)
+            CFrameMon = CFrame.new(-1542.42, 15.63, -12412.43)
+        elseif MyLevel >= 2200 and MyLevel <= 2249 then
+            NameQuest = "CakeQuest1" QuestLv = 1 Ms = "Ice Cream Chef" NameMon = "Ice Cream Chef"
+            CFrameQ = CFrame.new(-2124.42, 73.12, -12124.42)
+            CFrameMon = CFrame.new(-2342.12, 73.12, -12512.43)
+        elseif MyLevel >= 2250 and MyLevel <= 2299 then
+            NameQuest = "CakeQuest1" QuestLv = 2 Ms = "Ice Cream Commander" NameMon = "Ice Cream Commander"
+            CFrameQ = CFrame.new(-2124.42, 73.12, -12124.42)
+            CFrameMon = CFrame.new(-2512.42, 73.12, -12812.43)
+        elseif MyLevel >= 2300 and MyLevel <= 2349 then
+            NameQuest = "CakeQuest2" QuestLv = 1 Ms = "Cookie Cracker" NameMon = "Cookie Cracker"
+            CFrameQ = CFrame.new(-3124.42, 73.12, -12124.42)
+            CFrameMon = CFrame.new(-3342.42, 73.12, -12512.43)
+        elseif MyLevel >= 2350 and MyLevel <= 2399 then
+            NameQuest = "CakeQuest2" QuestLv = 2 Ms = "Cake Guard" NameMon = "Cake Guard"
+            CFrameQ = CFrame.new(-3124.42, 73.12, -12124.42)
+            CFrameMon = CFrame.new(-3512.42, 73.12, -12812.43)
+        elseif MyLevel >= 2400 and MyLevel <= 2449 then
+            NameQuest = "CandyIslandQuest" QuestLv = 1 Ms = "Candy Pirate" NameMon = "Candy Pirate"
+            CFrameQ = CFrame.new(-4124.42, 15.63, -12124.42)
+            CFrameMon = CFrame.new(-4342.12, 15.63, -12512.43)
+        elseif MyLevel >= 2450 then
+            NameQuest = "CandyIslandQuest" QuestLv = 2 Ms = "Snow Cone Machine" NameMon = "Snow Cone Machine"
+            CFrameQ = CFrame.new(-4124.42, 15.63, -12124.42)
+            CFrameMon = CFrame.new(-4512.42, 15.63, -12812.43)
         end
     end
 end

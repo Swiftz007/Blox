@@ -17,7 +17,7 @@ local TweenService = game:GetService("TweenService")
 --=========================
 local Window = Fluent:CreateWindow({
 Title = "Reaper Hub",
-SubTitle = "Blox Fruits",   --4
+SubTitle = "Blox Fruits",   --5
 TabWidth = 160,
 Size = UDim2.fromOffset(520, 360),
 Theme = "Reaper",
@@ -304,12 +304,6 @@ task.spawn(function()
                     bringmob = true
                     local enemy = workspace.Enemies:FindFirstChild(Ms) or workspace.Enemies:FindFirstChild(NameMon)
                     if enemy and enemy:FindFirstChild("Humanoid") and enemy.Humanoid.Health > 0 then
-
-
--- [ 🔥 AUTO BUSO HAKI ]
-if not player.Character:FindFirstChild("HasBuso") then
-    game:GetService("ReplicatedStorage").Remotes.CommF_:InvokeServer("Buso")
-end
 					
                     -- ติดตั้งอาวุธ
                         for _, v in pairs(player.Backpack:GetChildren()) do

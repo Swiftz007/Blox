@@ -11,15 +11,13 @@ local player = game.Players.LocalPlayer
 local RunService = game:GetService("RunService")
 local TweenService = game:GetService("TweenService")
 
-local Sea1 = true
-local Sea2 = true
 
 --=========================
 -- 🔥 WINDOW
 --=========================
 local Window = Fluent:CreateWindow({
 Title = "Reaper Hub",
-SubTitle = "Blox Fruits",   --3
+SubTitle = "Blox Fruits",   --4
 TabWidth = 160,
 Size = UDim2.fromOffset(520, 360),
 Theme = "Reaper",
@@ -257,78 +255,6 @@ function CheckLevel()
             NameQuest = "FountainQuest" QuestLv = 2 Ms = "Galley Captain" NameMon = "Galley Captain"
             CFrameQ = CFrame.new(5258.27, 38.52, 4050.04)
             CFrameMon = CFrame.new(5677.67, 92.78, 4966.63)
-	    end
--- Sea 2
-    if Sea2 then
-        local MyLevel = player.Data.Level.Value
-        if MyLevel >= 700 and MyLevel <= 724 then
-            NameQuest = "Area1Quest" QuestLv = 1 Ms = "Raider" NameMon = "Raider"
-            CFrameQ = CFrame.new(-424.12, 7.32, 1836.15)
-            CFrameMon = CFrame.new(-423.83, 137.76, 1737.52)
-        elseif MyLevel >= 725 and MyLevel <= 774 then
-            NameQuest = "Area1Quest" QuestLv = 2 Ms = "Mercenary" NameMon = "Mercenary"
-            CFrameQ = CFrame.new(-424.12, 7.32, 1836.15)
-            CFrameMon = CFrame.new(-624.71, 73.19, 1551.92)
-        elseif MyLevel >= 775 and MyLevel <= 874 then
-            NameQuest = "Area2Quest" QuestLv = 1 Ms = "Swan Pirate" NameMon = "Swan Pirate"
-            CFrameQ = CFrame.new(634.78, 73.18, 918.52)
-            CFrameMon = CFrame.new(915.28, 120.35, 1203.49)
-        elseif MyLevel >= 875 and MyLevel <= 899 then
-            NameQuest = "MarineQuest3" QuestLv = 1 Ms = "Marine Captain" NameMon = "Marine Captain"
-            CFrameQ = CFrame.new(-3141.27, 48.33, 1999.04)
-            CFrameMon = CFrame.new(-3180.52, 142.34, 1953.54)
-        elseif MyLevel >= 900 and MyLevel <= 949 then
-            NameQuest = "MarineQuest3" QuestLv = 2 Ms = "Marine Lieutenant" NameMon = "Marine Lieutenant"
-            CFrameQ = CFrame.new(-3141.27, 48.33, 1999.04)
-            CFrameMon = CFrame.new(-2940.35, 141.34, 2307.75)
-        elseif MyLevel >= 950 and MyLevel <= 999 then
-            NameQuest = "ZombieQuest" QuestLv = 1 Ms = "Zombie" NameMon = "Zombie"
-            CFrameQ = CFrame.new(-5497.10, 48.47, -794.75)
-            CFrameMon = CFrame.new(-5660.10, 102.50, -748.24)
-        elseif MyLevel >= 1000 and MyLevel <= 1049 then
-            NameQuest = "ZombieQuest" QuestLv = 2 Ms = "Vampire" NameMon = "Vampire"
-            CFrameQ = CFrame.new(-5497.10, 48.47, -794.75)
-            CFrameMon = CFrame.new(-6054.34, 6.38, -1318.52)
-        elseif MyLevel >= 1050 and MyLevel <= 1099 then
-            NameQuest = "SnowMountainQuest" QuestLv = 1 Ms = "Snow Trooper" NameMon = "Snow Trooper"
-            CFrameQ = CFrame.new(609.11, 401.41, -5372.43)
-            CFrameMon = CFrame.new(477.58, 431.11, -5312.56)
-        elseif MyLevel >= 1100 and MyLevel <= 1149 then
-            NameQuest = "SnowMountainQuest" QuestLv = 2 Ms = "Winter Warrior" NameMon = "Winter Warrior"
-            CFrameQ = CFrame.new(609.11, 401.41, -5372.43)
-            CFrameMon = CFrame.new(1157.51, 431.11, -5143.51)
-        elseif MyLevel >= 1150 and MyLevel <= 1199 then
-            NameQuest = "IceSideQuest" QuestLv = 1 Ms = "Lab Subordinate" NameMon = "Lab Subordinate"
-            CFrameQ = CFrame.new(-6062.24, 15.95, -4905.15)
-            CFrameMon = CFrame.new(-5780.20, 37.45, -4482.41)
-        elseif MyLevel >= 1200 and MyLevel <= 1249 then
-            NameQuest = "IceSideQuest" QuestLv = 2 Ms = "Horned Warrior" NameMon = "Horned Warrior"
-            CFrameQ = CFrame.new(-6062.24, 15.95, -4905.15)
-            CFrameMon = CFrame.new(-6403.49, 24.31, -5807.51)
-        elseif MyLevel >= 1250 and MyLevel <= 1299 then
-            NameQuest = "FireSideQuest" QuestLv = 1 Ms = "Magma Ninja" NameMon = "Magma Ninja"
-            CFrameQ = CFrame.new(-5429.62, 15.95, -5296.88)
-            CFrameMon = CFrame.new(-5414.07, 72.82, -5978.23)
-        elseif MyLevel >= 1300 and MyLevel <= 1349 then
-            NameQuest = "FireSideQuest" QuestLv = 2 Ms = "Lava Pirate" NameMon = "Lava Pirate"
-            CFrameQ = CFrame.new(-5429.62, 15.95, -5296.88)
-            CFrameMon = CFrame.new(-5264.44, 43.11, -4718.34)
-        elseif MyLevel >= 1350 and MyLevel <= 1399 then
-            NameQuest = "ShipQuest1" QuestLv = 1 Ms = "Ship Deckhand" NameMon = "Ship Deckhand"
-            CFrameQ = CFrame.new(1038.54, 125.10, 32906.96)
-            CFrameMon = CFrame.new(819.53, 131.23, 32881.02)
-        elseif MyLevel >= 1400 and MyLevel <= 1424 then
-            NameQuest = "ShipQuest1" QuestLv = 2 Ms = "Ship Steward" NameMon = "Ship Steward"
-            CFrameQ = CFrame.new(1038.54, 125.10, 32906.96)
-            CFrameMon = CFrame.new(904.38, 131.23, 33027.69)
-        elseif MyLevel >= 1425 and MyLevel <= 1449 then
-            NameQuest = "ShipQuest2" QuestLv = 1 Ms = "Ship Officer" NameMon = "Ship Officer"
-            CFrameQ = CFrame.new(969.41, 125.10, 33245.24)
-            CFrameMon = CFrame.new(788.89, 130.43, 33234.33)
-        elseif MyLevel >= 1450 and MyLevel <= 1499 then
-            NameQuest = "ShipQuest2" QuestLv = 2 Ms = "Ship Engineer" NameMon = "Ship Engineer"
-            CFrameQ = CFrame.new(969.41, 125.10, 33245.24)
-            CFrameMon = CFrame.new(925.32, 130.43, 33352.41)
         end
     end
 end
@@ -379,6 +305,12 @@ task.spawn(function()
                     local enemy = workspace.Enemies:FindFirstChild(Ms) or workspace.Enemies:FindFirstChild(NameMon)
                     if enemy and enemy:FindFirstChild("Humanoid") and enemy.Humanoid.Health > 0 then
 
+
+-- [ 🔥 AUTO BUSO HAKI ]
+if not player.Character:FindFirstChild("HasBuso") then
+    game:GetService("ReplicatedStorage").Remotes.CommF_:InvokeServer("Buso")
+end
+					
                     -- ติดตั้งอาวุธ
                         for _, v in pairs(player.Backpack:GetChildren()) do
                             if v:IsA("Tool") and v.ToolTip == _G.SelectWeapon then

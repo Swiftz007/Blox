@@ -27,7 +27,7 @@ end)
 --=========================
 local Window = Fluent:CreateWindow({
 Title = "Reaper Hub",
-SubTitle = "Blox Fruits",   --6
+SubTitle = "Blox Fruits",   --7
 TabWidth = 160,
 Size = UDim2.fromOffset(520, 360),
 Theme = "Reaper",
@@ -120,49 +120,8 @@ Stroke.Parent = Logo
 
 local Tabs = {
 Main = Window:AddTab({ Title = "Main", Icon = "home" }),
-Stats = Window:AddTab({ Title = "Stats", Icon = "signal" }), -- เพิ่มอันนี้
 Settings = Window:AddTab({ Title = "Settings", Icon = "settings" })
 }
-
---=========================
--- 📊 STATS TAB UI
---=========================
-local StatList = {"Melee", "Defense", "Sword", "Gun", "Demon Fruit"}
-local SelectStat = Tabs.Stats:AddDropdown("SelectStat", {
-    Title = "Select Stat to Upgrade",
-    Values = StatList,
-    Default = "Melee",
-})
-
-_G.SelectStat = "Melee" -- ตั้งค่าเริ่มต้น
-SelectStat:OnChanged(function(Value)
-    _G.SelectStat = Value
-end)
-
-_G.AutoStats = false
-local ToggleStats = Tabs.Stats:AddToggle("AutoStats", {Title = "Auto Upgrade Stats", Default = false})
-ToggleStats:OnChanged(function(Value)
-    _G.AutoStats = Value
-end)
-
---=========================
--- 🔄 AUTO STATS LOOP
---=========================
-task.spawn(function()
-    while task.wait(0.5) do -- เช็คทุกๆ 0.5 วินาที
-        if _G.AutoStats then
-            pcall(function()
-                -- เช็คว่ามีแต้มเหลือไหม
-                local points = player.Data.StatsPoints.Value
-                if points > 0 then
-                    -- ส่งคำสั่งไปที่ Server เพื่ออัพแต้ม (ครั้งละ 1 แต้ม)
-                    game:GetService("ReplicatedStorage").Remotes.CommF_:InvokeServer("AddPoint", _G.SelectStat, 1)
-                end
-            end)
-        end
-    end
-end)
-
 
 -- Function Auto Farm
 --=========================

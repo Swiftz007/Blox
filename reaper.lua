@@ -11,13 +11,22 @@ local player = game.Players.LocalPlayer
 local RunService = game:GetService("RunService")
 local TweenService = game:GetService("TweenService")
 
+local Sea1 = game.PlaceId == 2753915549
+local Sea2 = game.PlaceId == 4442272160
+
+-- ระบบป้องกันการถูกเตะ (Anti-AFK)
+player.Idled:Connect(function()
+    game:GetService("VirtualUser"):CaptureController()
+    game:GetService("VirtualUser"):ClickButton2(Vector2.new())
+end)
+
 
 --=========================
 -- 🔥 WINDOW
 --=========================
 local Window = Fluent:CreateWindow({
 Title = "Reaper Hub",
-SubTitle = "Blox Fruits",   --5
+SubTitle = "Blox Fruits",   --6
 TabWidth = 160,
 Size = UDim2.fromOffset(520, 360),
 Theme = "Reaper",
@@ -108,11 +117,50 @@ Stroke.Transparency = 1
 Stroke.Parent = Logo
 
 
--- Tab
 local Tabs = {
 Main = Window:AddTab({ Title = "Main", Icon = "home" }),
+Stats = Window:AddTab({ Title = "Stats", Icon = "signal" }), -- เพิ่มอันนี้
 Settings = Window:AddTab({ Title = "Settings", Icon = "settings" })
 }
+
+--=========================
+-- 📊 STATS TAB UI
+--=========================
+local StatList = {"Melee", "Defense", "Sword", "Gun", "Demon Fruit"}
+local SelectStat = Tabs.Stats:AddDropdown("SelectStat", {
+    Title = "Select Stat to Upgrade",
+    Values = StatList,
+    Default = "Melee",
+})
+
+_G.SelectStat = "Melee" -- ตั้งค่าเริ่มต้น
+SelectStat:OnChanged(function(Value)
+    _G.SelectStat = Value
+end)
+
+_G.AutoStats = false
+local ToggleStats = Tabs.Stats:AddToggle("AutoStats", {Title = "Auto Upgrade Stats", Default = false})
+ToggleStats:OnChanged(function(Value)
+    _G.AutoStats = Value
+end)
+
+--=========================
+-- 🔄 AUTO STATS LOOP
+--=========================
+task.spawn(function()
+    while task.wait(0.5) do -- เช็คทุกๆ 0.5 วินาที
+        if _G.AutoStats then
+            pcall(function()
+                -- เช็คว่ามีแต้มเหลือไหม
+                local points = player.Data.StatsPoints.Value
+                if points > 0 then
+                    -- ส่งคำสั่งไปที่ Server เพื่ออัพแต้ม (ครั้งละ 1 แต้ม)
+                    game:GetService("ReplicatedStorage").Remotes.CommF_:InvokeServer("AddPoint", _G.SelectStat, 1)
+                end
+            end)
+        end
+    end
+end)
 
 
 -- Function Auto Farm
@@ -140,21 +188,29 @@ local function Tween(Target)
 end
 
 local function Attack()
-    local VirtualUser = game:GetService("VirtualUser")
-    VirtualUser:CaptureController()
-    VirtualUser:ClickButton1(Vector2.new(851, 158))
+    pcall(function()
+        -- ส่ง Signal ไปที่ Server เพื่อเพิ่มความเร็วในการตี
+        game:GetService("ReplicatedStorage").Remotes.Validator:FireServer(math.random(1,100))
+        
+        -- ใช้ Button1Down แทน Click เพื่อความต่อเนื่อง
+        local VirtualUser = game:GetService("VirtualUser")
+        VirtualUser:CaptureController()
+        VirtualUser:Button1Down(Vector2.new(851, 158))
+    end)
 end
+
 
 --=========================
 -- 📜 QUEST LOGIC (นำไปขยายต่อตาม List ของคุณ)
 --=========================
 function CheckLevel()
-    local MyLevel = game:GetService("Players").LocalPlayer.Data.Level.Value
+    local MyLevel = player.Data.Level.Value
     if Sea1 then
         if MyLevel >= 0 and MyLevel <= 9 then
             NameQuest = "BanditQuest1" QuestLv = 1 Ms = "Bandit" NameMon = "Bandit"
             CFrameQ = CFrame.new(1059.37, 15.44, 1549.12)
             CFrameMon = CFrame.new(1038.55, 41.29, 1576.50)
+        CFrameMon = CFrame.new(1038.55, 41.29, 1576.50)
         elseif MyLevel >= 10 and MyLevel <= 14 then
             NameQuest = "JungleQuest" QuestLv = 1 Ms = "Monkey" NameMon = "Monkey"
             CFrameQ = CFrame.new(-1598.46, 35.55, 153.30)
@@ -256,8 +312,99 @@ function CheckLevel()
             CFrameQ = CFrame.new(5258.27, 38.52, 4050.04)
             CFrameMon = CFrame.new(5677.67, 92.78, 4966.63)
         end
+        elseif Sea2 then
+        if MyLevel >= 700 and MyLevel <= 724 then
+            NameQuest = "Area1Quest" QuestLv = 1 Ms = "Raider" NameMon = "Raider"
+            CFrameQ = CFrame.new(-424.12, 7.32, 1836.15)
+            CFrameMon = CFrame.new(-423.83, 137.76, 1737.52)
+        elseif MyLevel >= 725 and MyLevel <= 774 then
+            NameQuest = "Area1Quest" QuestLv = 2 Ms = "Mercenary" NameMon = "Mercenary"
+            CFrameQ = CFrame.new(-424.12, 7.32, 1836.15)
+            CFrameMon = CFrame.new(-624.71, 73.19, 1551.92)
+        elseif MyLevel >= 775 and MyLevel <= 799 then
+            NameQuest = "Area2Quest" QuestLv = 1 Ms = "Swan Pirate" NameMon = "Swan Pirate"
+            CFrameQ = CFrame.new(638.43, 73.19, 918.28)
+            CFrameMon = CFrame.new(874.53, 121.31, 1287.12)
+        elseif MyLevel >= 800 and MyLevel <= 874 then
+            NameQuest = "Area2Quest" QuestLv = 2 Ms = "Factory Staff" NameMon = "Factory Staff"
+            CFrameQ = CFrame.new(638.43, 73.19, 918.28)
+            CFrameMon = CFrame.new(295.53, 73.19, -56.12)
+        elseif MyLevel >= 875 and MyLevel <= 899 then
+            NameQuest = "MarineQuest3" QuestLv = 1 Ms = "Marine Lieutenant" NameMon = "Marine Lieutenant"
+            CFrameQ = CFrame.new(-2440.80, 73.11, -3221.03)
+            CFrameMon = CFrame.new(-2835.65, 73.11, -3014.23)
+        elseif MyLevel >= 900 and MyLevel <= 949 then
+            NameQuest = "MarineQuest3" QuestLv = 2 Ms = "Marine Captain" NameMon = "Marine Captain"
+            CFrameQ = CFrame.new(-2440.80, 73.11, -3221.03)
+            CFrameMon = CFrame.new(-1870.04, 73.11, -3320.12)
+        elseif MyLevel >= 950 and MyLevel <= 974 then
+            NameQuest = "ZombieQuest" QuestLv = 1 Ms = "Zombie" NameMon = "Zombie"
+            CFrameQ = CFrame.new(-5492.42, 48.51, -794.67)
+            CFrameMon = CFrame.new(-5720.52, 12.63, -727.12)
+        elseif MyLevel >= 975 and MyLevel <= 999 then
+            NameQuest = "ZombieQuest" QuestLv = 2 Ms = "Vampire" NameMon = "Vampire"
+            CFrameQ = CFrame.new(-5492.42, 48.51, -794.67)
+            CFrameMon = CFrame.new(-6031.54, 6.38, -1316.53)
+        elseif MyLevel >= 1000 and MyLevel <= 1049 then
+            NameQuest = "SnowMountainQuest" QuestLv = 1 Ms = "Snow Trooper" NameMon = "Snow Trooper"
+            CFrameQ = CFrame.new(609.11, 401.55, -5371.43)
+            CFrameMon = CFrame.new(475.22, 401.55, -5290.41)
+        elseif MyLevel >= 1050 and MyLevel <= 1099 then
+            NameQuest = "SnowMountainQuest" QuestLv = 2 Ms = "Winter Warrior" NameMon = "Winter Warrior"
+            CFrameQ = CFrame.new(609.11, 401.55, -5371.43)
+            CFrameMon = CFrame.new(1151.04, 430.22, -5134.42)
+        elseif MyLevel >= 1100 and MyLevel <= 1124 then
+            NameQuest = "IceSideQuest" QuestLv = 1 Ms = "Lab Subordinate" NameMon = "Lab Subordinate"
+            CFrameQ = CFrame.new(-6061.64, 15.68, -4904.72)
+            CFrameMon = CFrame.new(-5793.12, 15.68, -4836.42)
+        elseif MyLevel >= 1125 and MyLevel <= 1174 then
+            NameQuest = "IceSideQuest" QuestLv = 2 Ms = "Horned Warrior" NameMon = "Horned Warrior"
+            CFrameQ = CFrame.new(-6061.64, 15.68, -4904.72)
+            CFrameMon = CFrame.new(-6423.42, 24.32, -5812.53)
+        elseif MyLevel >= 1175 and MyLevel <= 1199 then
+            NameQuest = "FireSideQuest" QuestLv = 1 Ms = "Magma Ninja" NameMon = "Magma Ninja"
+            CFrameQ = CFrame.new(-5431.11, 15.68, -5296.22)
+            CFrameMon = CFrame.new(-5395.23, 78.43, -5841.04)
+        elseif MyLevel >= 1200 and MyLevel <= 1249 then
+            NameQuest = "FireSideQuest" QuestLv = 2 Ms = "Lava Pirate" NameMon = "Lava Pirate"
+            CFrameQ = CFrame.new(-5431.11, 15.68, -5296.22)
+            CFrameMon = CFrame.new(-5248.53, 12.63, -4724.32)
+        elseif MyLevel >= 1250 and MyLevel <= 1274 then
+            NameQuest = "ShipQuest1" QuestLv = 1 Ms = "Ship Officer" NameMon = "Ship Officer"
+            CFrameQ = CFrame.new(1038.52, 125.10, 32911.32)
+            CFrameMon = CFrame.new(761.53, 125.10, 32895.42)
+        elseif MyLevel >= 1275 and MyLevel <= 1299 then
+            NameQuest = "ShipQuest1" QuestLv = 2 Ms = "Ship Steward" NameMon = "Ship Steward"
+            CFrameQ = CFrame.new(1038.52, 125.10, 32911.32)
+            CFrameMon = CFrame.new(912.42, 125.10, 33025.12)
+        elseif MyLevel >= 1300 and MyLevel <= 1324 then
+            NameQuest = "ShipQuest2" QuestLv = 1 Ms = "Ship Cook" NameMon = "Ship Cook"
+            CFrameQ = CFrame.new(969.42, 125.10, 33245.23)
+            CFrameMon = CFrame.new(620.43, 125.10, 33261.22)
+        elseif MyLevel >= 1325 and MyLevel <= 1349 then
+            NameQuest = "ShipQuest2" QuestLv = 2 Ms = "Ship Engineer" NameMon = "Ship Engineer"
+            CFrameQ = CFrame.new(969.42, 125.10, 33245.23)
+            CFrameMon = CFrame.new(912.12, 125.10, 33365.42)
+        elseif MyLevel >= 1350 and MyLevel <= 1374 then
+            NameQuest = "IceCastleQuest" QuestLv = 1 Ms = "Arctic Warrior" NameMon = "Arctic Warrior"
+            CFrameQ = CFrame.new(6061.23, 28.53, -6475.22)
+            CFrameMon = CFrame.new(6021.52, 28.53, -6812.43)
+        elseif MyLevel >= 1375 and MyLevel <= 1424 then
+            NameQuest = "IceCastleQuest" QuestLv = 2 Ms = "Snow Lurker" NameMon = "Snow Lurker"
+            CFrameQ = CFrame.new(6061.23, 28.53, -6475.22)
+            CFrameMon = CFrame.new(5721.42, 126.32, -6312.41)
+        elseif MyLevel >= 1425 and MyLevel <= 1449 then
+            NameQuest = "ForgottenQuest" QuestLv = 1 Ms = "Sea Soldier" NameMon = "Sea Soldier"
+            CFrameQ = CFrame.new(-3055.22, 235.54, -10142.12)
+            CFrameMon = CFrame.new(-3022.42, 15.63, -9714.52)
+        elseif MyLevel >= 1450 then
+            NameQuest = "ForgottenQuest" QuestLv = 2 Ms = "Water Tiger" NameMon = "Water Tiger"
+            CFrameQ = CFrame.new(-3055.22, 235.54, -10142.12)
+            CFrameMon = CFrame.new(-3125.53, 15.63, -10512.42)
+        end
     end
 end
+
 
 
 --=========================
@@ -283,7 +430,7 @@ WeaponDropdown:OnChanged(function(Value)
 end)
 
 --=========================
--- 🔄 CORE LOOPS
+-- 🔄 CORE LOOPS (UPGRADED)
 --=========================
 
 -- Loop: Auto Quest & Tween
@@ -296,26 +443,43 @@ task.spawn(function()
                 
                 if not questVisible then
                     bringmob = false
-                    Tween(CFrameQ)
-                    if (CFrameQ.Position - player.Character.HumanoidRootPart.Position).Magnitude <= 10 then
-                        game:GetService("ReplicatedStorage").Remotes.CommF_:InvokeServer("StartQuest", NameQuest, QuestLv)
+                    -- ✅ เช็คก่อนว่ามีพิกัดเควสไหม (กัน Error nil)
+                    if CFrameQ then
+                        Tween(CFrameQ)
+                        if (CFrameQ.Position - player.Character.HumanoidRootPart.Position).Magnitude <= 15 then
+                            game:GetService("ReplicatedStorage").Remotes.CommF_:InvokeServer("StartQuest", NameQuest, QuestLv)
+                        end
                     end
                 else
-                    bringmob = true
                     local enemy = workspace.Enemies:FindFirstChild(Ms) or workspace.Enemies:FindFirstChild(NameMon)
                     if enemy and enemy:FindFirstChild("Humanoid") and enemy.Humanoid.Health > 0 then
-					
-                    -- ติดตั้งอาวุธ
-                        for _, v in pairs(player.Backpack:GetChildren()) do
-                            if v:IsA("Tool") and v.ToolTip == _G.SelectWeapon then
-                                player.Character.Humanoid:EquipTool(v)
-                            end
+                        bringmob = true
+                        
+                        -- [[ ✅ AUTO BUSO HAKI ]]
+                        if not player.Character:FindFirstChild("HasBuso") then
+                            game:GetService("ReplicatedStorage").Remotes.CommF_:InvokeServer("Buso")
                         end
+
+                   -- ✅ ตรวจสอบและสวมใส่อาวุธ (รองรับ Melee, Sword, และ Fruit)
+local toolName = _G.SelectWeapon
+if toolName == "Fruit" then toolName = "Blox Fruit" end -- แปลงชื่อให้ตรงกับระบบของเกม
+
+for _, v in pairs(player.Backpack:GetChildren()) do
+    if v:IsA("Tool") and v.ToolTip == toolName then
+        player.Character.Humanoid:EquipTool(v)
+    end
+end
+
+                        
                         -- ล็อคตำแหน่งเหนือมอนสเตอร์
                         player.Character.HumanoidRootPart.CFrame = enemy.HumanoidRootPart.CFrame * CFrame.new(0, 12, 0)
                         Attack()
                     else
-                        Tween(CFrameMon) -- ไปจุดเกิดมอน
+                        bringmob = false
+                        -- ✅ เช็คก่อนว่ามีพิกัดมอนไหม
+                        if CFrameMon then
+                            Tween(CFrameMon)
+                        end
                     end
                 end
             end)
@@ -323,7 +487,7 @@ task.spawn(function()
     end
 end)
 
--- Loop: Bring Mob & Hitbox (ใช้ Heartbeat เพื่อความลื่นไหล)
+-- Loop: Bring Mob & Hitbox (Heartbeat)
 RunService.Heartbeat:Connect(function()
     if _G.AutoLevel and _G.BringMob and bringmob then
         pcall(function()
@@ -333,14 +497,16 @@ RunService.Heartbeat:Connect(function()
                     v.HumanoidRootPart.Size = Vector3.new(50, 50, 50)
                     v.HumanoidRootPart.CFrame = player.Character.HumanoidRootPart.CFrame * CFrame.new(0, -12, 0)
                     v.HumanoidRootPart.Velocity = Vector3.new(0, 0, 0)
-                    sethiddenproperty(player, "SimulationRadius", math.huge)
+                    
+                    -- เช็ค sethiddenproperty กัน Executor บางตัว Error
+                    if sethiddenproperty then
+                        sethiddenproperty(player, "SimulationRadius", math.huge)
+                    end
                 end
             end
         end)
     end
 end)
-
-
 
 
 --=========================

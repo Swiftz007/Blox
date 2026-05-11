@@ -4,6 +4,10 @@ local Fluent = loadstring(game:HttpGet("https://raw.githubusercontent.com/Swiftz
 local SaveManager = loadstring(game:HttpGet("https://raw.githubusercontent.com/dawid-scripts/Fluent/master/Addons/SaveManager.lua"))()
 local InterfaceManager = loadstring(game:HttpGet("https://raw.githubusercontent.com/dawid-scripts/Fluent/master/Addons/InterfaceManager.lua"))()
 
+local player = game.Players.LocalPlayer
+local RunService = game:GetService("RunService")
+local TweenService = game:GetService("TweenService")
+
 --=========================
 -- 🔥 WINDOW
 --=========================
@@ -111,6 +115,8 @@ Settings = Window:AddTab({ Title = "Settings", Icon = "settings" })
 --=========================
 -- 🔥 SETTINGS & VARIABLES (เพิ่มต่อจากบรรทัดแรกๆ)
 --=========================
+local Sea1 = true -- กำหนดว่าเป็นโลก 1
+
 _G.AutoLevel = false
 _G.BringMob = true
 _G.FastAttack = true

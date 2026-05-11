@@ -11,22 +11,15 @@ local player = game.Players.LocalPlayer
 local RunService = game:GetService("RunService")
 local TweenService = game:GetService("TweenService")
 
-local Sea1 = false
-local Sea2 = false
-
-if game.PlaceId == 2753915549 then
-    Sea1 = true
-elseif game.PlaceId == 4442272160 then
-    Sea2 = true
-end
-
+local Sea1 = true
+local Sea2 = true
 
 --=========================
 -- 🔥 WINDOW
 --=========================
 local Window = Fluent:CreateWindow({
 Title = "Reaper Hub",
-SubTitle = "Blox Fruits",
+SubTitle = "Blox Fruits",   --3
 TabWidth = 160,
 Size = UDim2.fromOffset(520, 360),
 Theme = "Reaper",
@@ -341,7 +334,6 @@ function CheckLevel()
 end
 
 
-
 --=========================
 -- 🖱 MAIN TAB UI (เพิ่มเข้าใน Tabs.Main)
 --=========================
@@ -386,14 +378,8 @@ task.spawn(function()
                     bringmob = true
                     local enemy = workspace.Enemies:FindFirstChild(Ms) or workspace.Enemies:FindFirstChild(NameMon)
                     if enemy and enemy:FindFirstChild("Humanoid") and enemy.Humanoid.Health > 0 then
-                    
--- [ 🔥 AUTO BUSO HAKI ]
-if not player.Character:FindFirstChild("HasBuso") then
-    game:GetService("ReplicatedStorage").Remotes.CommF_:InvokeServer("Buso")
-end
 
-                    
-                        -- ติดตั้งอาวุธ
+                    -- ติดตั้งอาวุธ
                         for _, v in pairs(player.Backpack:GetChildren()) do
                             if v:IsA("Tool") and v.ToolTip == _G.SelectWeapon then
                                 player.Character.Humanoid:EquipTool(v)

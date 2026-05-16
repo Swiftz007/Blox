@@ -107,6 +107,118 @@ Settings = Window:AddTab({ Title = "Settings", Icon = "settings" })
 
 
 -- Full Function Here
+--=========================
+-- 🛠 CONFIGURATION & STATE
+--=========================
+local Config = {
+    Speed = 22,
+    SpeedEnabled = false,
+    AutoHide = false,
+    AutoLoot = false,
+    AutoUnlock = false,
+    Fullbright = false,
+    ESP = { Doors = false, Items = false, Entities = false }
+}
+
+local lp = game.Players.LocalPlayer
+local RunService = game:GetService("RunService")
+local Lighting = game:GetService("Lighting")
+
+--=========================
+-- 🛡️ CORE LOGIC (OPTIMIZED)
+--=========================
+
+-- 1. SMART LOOP (Auto Loot & Auto Unlock)
+task.spawn(function()
+    while task.wait(0.3) do
+        if not lp.Character or not lp.Character:FindFirstChild("HumanoidRootPart") then continue end
+        local hrp = lp.Character.HumanoidRootPart
+        local hasKey = lp.Character:FindFirstChild("Key") or lp.Backpack:FindFirstChild("Key")
+
+        for _, v in pairs(workspace:GetDescendants()) do
+            if v:IsA("ProximityPrompt") then
+                local p = v.Parent
+                if p then
+                    local dist = (hrp.Position - (p:IsA("Model") and p:GetPivot().Position or p.Position)).Magnitude
+                    if dist < 15 then
+                        -- Auto Unlock (ถ้ามีกุญแจและเดินชน)
+                        if Config.AutoUnlock and hasKey and (v.ActionText == "Unlock" or v.ObjectText == "Locked Door") then
+                            fireproximityprompt(v)
+                        -- Auto Loot (ทอง/กุญแจ/หนังสือ)
+                        elseif Config.AutoLoot and (v.ObjectText == "Gold" or v.ObjectText == "Key" or p.Name == "KeyObtain" or p.Name == "LiveHintBook") then
+                            fireproximityprompt(v)
+                        end
+                    end
+                end
+            end
+        end
+    end
+end)
+
+-- 2. AUTO HIDE (EVENT-BASED)
+workspace.ChildAdded:Connect(function(child)
+    if Config.AutoHide and (child.Name == "RushMoving" or child.Name == "AmbushMoving" or child.Name:find("A60")) then
+        local hrp = lp.Character and lp.Character:FindFirstChild("HumanoidRootPart")
+        if hrp then
+            local oldPos = hrp.CFrame
+            hrp.CFrame = oldPos * CFrame.new(0, -7, 0)
+            child.Destroying:Wait()
+            hrp.CFrame = oldPos
+        end
+    end
+end)
+
+-- 3. ESP SYSTEM
+local function ApplyESP(obj, name, color)
+    if obj:FindFirstChild("ReaperESP") then return end
+    local bgui = Instance.new("BillboardGui", obj)
+    bgui.Name = "ReaperESP"; bgui.AlwaysOnTop = true; bgui.Size = UDim2.new(0, 80, 0, 40)
+    local tl = Instance.new("TextLabel", bgui)
+    tl.Size = UDim2.new(1,0,1,0); tl.BackgroundTransparency = 1; tl.Text = name; tl.TextColor3 = color; tl.TextScaled = true; tl.Font = Enum.Font.SourceSansBold
+end
+
+task.spawn(function()
+    while task.wait(1.5) do
+        if not (Config.ESP.Doors or Config.ESP.Items or Config.ESP.Entities) then
+            for _, v in pairs(workspace:GetDescendants()) do if v.Name == "ReaperESP" then v:Destroy() end end
+            continue
+        end
+        for _, v in pairs(workspace:GetDescendants()) do
+            if Config.ESP.Doors and v.Name == "Door" and v:IsA("Model") then ApplyESP(v, "DOOR", Color3.new(0,1,0))
+            elseif Config.ESP.Items and (v.Name == "KeyObtain" or v.Name == "LiveHintBook") then ApplyESP(v, "KEY/BOOK", Color3.new(1,1,0))
+            elseif Config.ESP.Entities and (v.Name == "RushMoving" or v.Name == "AmbushMoving" or v.Name == "Figure" or v.Name == "Seek") then ApplyESP(v, "ENTITY", Color3.new(1,0,0)) end
+        end
+    end
+end)
+
+--=========================
+-- 🏠 CONNECT TO UI TABS
+--=========================
+
+-- MAIN TAB
+Tabs.Main:AddToggle("AutoHide", {Title = "Auto-Hide (Mines/Floor 1)", Default = false}):OnChanged(function(v) Config.AutoHide = v end)
+Tabs.Main:AddToggle("AutoLoot", {Title = "Auto Loot (Gold/Items)", Default = false}):OnChanged(function(v) Config.AutoLoot = v end)
+Tabs.Main:AddToggle("AutoUnlock", {Title = "Auto Unlock (ชนแล้วไข)", Default = false}):OnChanged(function(v) Config.AutoUnlock = v end)
+
+-- PLAYER TAB
+Tabs.Player:AddToggle("SpeedToggle", {Title = "Enable Speed", Default = false}):OnChanged(function(v) Config.SpeedEnabled = v end)
+Tabs.Player:AddSlider("SpeedSlider", {Title = "WalkSpeed", Default = 22, Min = 16, Max = 45, Rounding = 1, Callback = function(v) Config.Speed = v end})
+Tabs.Player:AddToggle("Fullbright", {Title = "Fullbright (No Fog)", Default = false}):OnChanged(function(v) Config.Fullbright = v end)
+
+-- ESP TAB
+Tabs.ESP:AddToggle("ED", {Title = "Show Doors", Default = false}):OnChanged(function(v) Config.ESP.Doors = v v end)
+Tabs.ESP:AddToggle("EI", {Title = "Show Items", Default = false}):OnChanged(function(v) Config.ESP.Items = v end)
+Tabs.ESP:AddToggle("EE", {Title = "Show Entities", Default = false}):OnChanged(function(v) Config.ESP.Entities = v end)
+
+-- RUNTIME LOOP
+RunService.RenderStepped:Connect(function()
+    if Config.SpeedEnabled and lp.Character and lp.Character:FindFirstChild("Humanoid") then 
+        lp.Character.Humanoid.WalkSpeed = Config.Speed 
+    end
+    if Config.Fullbright then 
+        Lighting.Brightness = 2; Lighting.FogEnd = 9e9; Lighting.GlobalShadows = false 
+    end
+end)
 
 
 

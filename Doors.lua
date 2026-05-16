@@ -7,7 +7,7 @@ local InterfaceManager = loadstring(game:HttpGet("https://raw.githubusercontent.
 --=========================
 local Window = Fluent:CreateWindow({
 Title = "Reaper Hub",
-SubTitle = "Doors Beta", -- 3
+SubTitle = "Doors Beta", -- 4
 TabWidth = 160,
 Size = UDim2.fromOffset(520, 360),
 Theme = "Reaper",
@@ -124,18 +124,18 @@ local lp = game.Players.LocalPlayer
 local RunService = game:GetService("RunService")
 local Lighting = game:GetService("Lighting")
 
--- ฟังก์ชันแจ้งเตือน (ใช้ Fluent Notify)
+-- ฟังก์ชันแจ้งเตือน
 local function Notify(title, content)
     Fluent:Notify({
         Title = title,
         Content = content,
-        Duration = 5
+        Duration = 3
     })
 end
 
--- ฟังก์ชันเรียกใช้ ProximityPrompt แบบ Bypass ระยะ
+-- ฟังก์ชันกระตุ้น Prompt แบบรวดเร็ว
 local function SafePrompt(v)
-    if v and v:IsA("ProximityPrompt") then
+    if v and v:IsA("ProximityPrompt") and v.Enabled then
         task.spawn(function()
             fireproximityprompt(v)
         end)
@@ -143,30 +143,40 @@ local function SafePrompt(v)
 end
 
 --=========================
--- 🛡️ CORE LOGIC (FIXED & BYPASS)
+-- 🛡️ CORE LOGIC (RE-FIXED & BYPASS)
 --=========================
 
--- 1. SMART LOOP (Auto Loot & Auto Unlock) - แก้ไขระยะและการทำงาน
+-- 1. SMART AUTO LOOT & UNLOCK (Fixed for Drawers & Coins)
 task.spawn(function()
-    while task.wait(0.2) do
+    while task.wait(0.1) do -- เพิ่มความเร็วในการสแกน
         if not lp.Character or not lp.Character:FindFirstChild("HumanoidRootPart") then continue end
         local hrp = lp.Character.HumanoidRootPart
-        local hasKey = lp.Character:FindFirstChild("Key") or lp.Backpack:FindFirstChild("Key")
+        local char = lp.Character
+        local hasKey = char:FindFirstChild("Key") or lp.Backpack:FindFirstChild("Key") or char:FindFirstChild("LibraryKey")
 
         for _, v in pairs(workspace:GetDescendants()) do
             if v:IsA("ProximityPrompt") then
                 local p = v.Parent
-                if p then
-                    local dist = (hrp.Position - (p:IsA("Model") and p:GetPivot().Position or p.Position)).Magnitude
-                    
-                    -- [FIX] Auto Unlock: ระยะ 15 studs (ก่อนถึงตัว)
+                if not p then continue end
+                
+                local dist = (hrp.Position - (p:IsA("Model") and p:GetPivot().Position or p.Position)).Magnitude
+                
+                if dist < 18 then
+                    -- [AUTO UNLOCK] ไขประตู/กรง
                     if Config.AutoUnlock and hasKey and (v.ActionText == "Unlock" or v.ObjectText == "Locked Door" or p.Name == "Lock") then
-                        if dist < 15 then SafePrompt(v) end
-                    
-                    -- [FIX] Auto Loot: เจาะจง Item มากขึ้น
-                    elseif Config.AutoLoot then
-                        if v.ObjectText == "Gold" or v.ObjectText == "Key" or p.Name == "KeyObtain" or p.Name == "LiveHintBook" or p:FindFirstChild("GoldPile") then
-                            if dist < 18 then SafePrompt(v) end
+                        SafePrompt(v)
+                    end
+
+                    -- [AUTO LOOT] เก็บของ + เปิดลิ้นชัก/ตู้ อัตโนมัติเพื่อให้ของข้างในโผล่
+                    if Config.AutoLoot then
+                        -- เก็บเหรียญ/ทอง/กุญแจ/ไอเทม (Support Floor 1 & 2)
+                        if v.ObjectText == "Gold" or v.ObjectText == "Key" or p.Name:find("Gold") or p.Name:find("Key") or p.Name:find("Coin") or p.Name:find("Loot") then
+                            SafePrompt(v)
+                        end
+                        
+                        -- เปิดลิ้นชัก/ตู้/หีบ (เพื่อให้เก็บของข้างในได้)
+                        if v.ActionText == "Open" or v.ObjectText == "Drawer" or v.ObjectText == "Chest" then
+                            SafePrompt(v)
                         end
                     end
                 end
@@ -175,42 +185,42 @@ task.spawn(function()
     end
 end)
 
--- 2. AUTO HIDE (FIXED: ANCHOR & NOTIFY)
+-- 2. AUTO HIDE (FIXED: POSITION STICKY & GLITCH PROOF)
 local isHiding = false
-workspace.ChildAdded:Connect(function(child)
-    local entities = {"RushMoving", "AmbushMoving", "A60", "A120"}
-    local isEntity = false
-    for _, name in pairs(entities) do
-        if child.Name:find(name) then isEntity = true break end
-    end
+local hidePos = nil
 
-    if isEntity then
-        Notify("ENTITY DETECTED!", "Monster: " .. child.Name .. " is coming!")
-        
-        if Config.AutoHide then
+workspace.ChildAdded:Connect(function(child)
+    local entities = {"RushMoving", "AmbushMoving", "A60", "A120", "Blitz", "Haste"}
+    local nameMatch = false
+    for _, name in pairs(entities) do if child.Name:find(name) then nameMatch = true break end end
+
+    if nameMatch then
+        Notify("ENTITY SPAWNED!", child.Name:upper() .. " IS COMING!")
+        if Config.AutoHide and not isHiding then
             local hrp = lp.Character and lp.Character:FindFirstChild("HumanoidRootPart")
-            if hrp and not isHiding then
+            if hrp then
                 isHiding = true
-                local oldCF = hrp.CFrame
+                hidePos = hrp.CFrame -- ล็อคจุดยืนก่อนวาร์ป
                 
-                -- มุดดินและล็อคตัว (Anchor) กัน Glitch
-                hrp.CFrame = oldCF * CFrame.new(0, -7, 0)
-                task.wait(0.1)
-                hrp.Anchored = true 
+                -- ลงลึกขึ้นกัน Glitch และล็อคเป้า
+                hrp.Anchored = true
+                hrp.CFrame = hidePos * CFrame.new(0, -20, 0)
                 
                 child.Destroying:Wait()
+                task.wait(0.5) -- Delay ความชัวร์
                 
-                -- ปลดล็อคและกลับที่เดิม
+                -- กลับที่เดิม (ป้องกันการดีดไปจุดอื่น)
+                hrp.CFrame = hidePos
                 hrp.Anchored = false
-                hrp.CFrame = oldCF
                 isHiding = false
-                Notify("SAFE", "The entity is gone.")
+                hidePos = nil
+                Notify("SAFE", "Entity has passed.")
             end
         end
     end
 end)
 
--- 3. ESP SYSTEM (OPTIMIZED)
+-- 3. ESP (STABLE)
 local function ApplyESP(obj, name, color)
     if obj:FindFirstChild("ReaperESP") then return end
     local bgui = Instance.new("BillboardGui", obj)
@@ -221,13 +231,13 @@ end
 
 task.spawn(function()
     while task.wait(1.5) do
-        if not (Config.ESP.Doors or Config.ESP.Items or Config.ESP.Entities) then
-            for _, v in pairs(workspace:GetDescendants()) do if v.Name == "ReaperESP" then v:Destroy() end end
-            continue
-        end
         for _, v in pairs(workspace:GetDescendants()) do
+            if v.Name == "ReaperESP" then 
+                if not (Config.ESP.Doors or Config.ESP.Items or Config.ESP.Entities) then v:Destroy() end
+                continue 
+            end
             if Config.ESP.Doors and v.Name == "Door" and v:IsA("Model") then ApplyESP(v, "DOOR", Color3.new(0,1,0))
-            elseif Config.ESP.Items and (v.Name == "KeyObtain" or v.Name == "LiveHintBook") then ApplyESP(v, "KEY/BOOK", Color3.new(1,1,0))
+            elseif Config.ESP.Items and (v.Name == "KeyObtain" or v.Name == "LiveHintBook" or v.Name:find("Key")) then ApplyESP(v, "KEY/BOOK", Color3.new(1,1,0))
             elseif Config.ESP.Entities and (v.Name == "RushMoving" or v.Name == "AmbushMoving" or v.Name == "Figure" or v.Name == "Seek") then ApplyESP(v, "ENTITY", Color3.new(1,0,0)) end
         end
     end
@@ -237,36 +247,39 @@ end)
 -- 🏠 CONNECT TO UI TABS
 --=========================
 
-Tabs.Main:AddToggle("AutoHide", {Title = "Auto-Hide (Anchor Mode)", Default = false}):OnChanged(function(v) Config.AutoHide = v end)
-Tabs.Main:AddToggle("AutoLoot", {Title = "Auto Loot (Fixed)", Default = false}):OnChanged(function(v) Config.AutoLoot = v end)
-Tabs.Main:AddToggle("AutoUnlock", {Title = "Auto Unlock (Near)", Default = false}):OnChanged(function(v) Config.AutoUnlock = v end)
+Tabs.Main:AddToggle("AutoHide", {Title = "Auto-Hide (Safe Mode)", Default = false}):OnChanged(function(v) Config.AutoHide = v end)
+Tabs.Main:AddToggle("AutoLoot", {Title = "Auto Loot (Open Containers)", Default = false}):OnChanged(function(v) Config.AutoLoot = v end)
+Tabs.Main:AddToggle("AutoUnlock", {Title = "Auto Unlock", Default = false}):OnChanged(function(v) Config.AutoUnlock = v end)
 
 Tabs.Player:AddToggle("SpeedToggle", {Title = "Enable Speed Bypass", Default = false}):OnChanged(function(v) Config.SpeedEnabled = v end)
-Tabs.Player:AddSlider("SpeedSlider", {Title = "WalkSpeed", Default = 22, Min = 16, Max = 45, Rounding = 1, Callback = function(v) Config.Speed = v end})
-Tabs.Player:AddToggle("Fullbright", {Title = "Fullbright (No Fog)", Default = false}):OnChanged(function(v) Config.Fullbright = v end)
+Tabs.Player:AddSlider("SpeedSlider", {Title = "Speed", Default = 22, Min = 16, Max = 45, Rounding = 1, Callback = function(v) Config.Speed = v end})
+Tabs.Player:AddToggle("Fullbright", {Title = "Fullbright", Default = false}):OnChanged(function(v) Config.Fullbright = v end)
 
 Tabs.ESP:AddToggle("ED", {Title = "Show Doors", Default = false}):OnChanged(function(v) Config.ESP.Doors = v end)
 Tabs.ESP:AddToggle("EI", {Title = "Show Items", Default = false}):OnChanged(function(v) Config.ESP.Items = v end)
 Tabs.ESP:AddToggle("EE", {Title = "Show Entities", Default = false}):OnChanged(function(v) Config.ESP.Entities = v end)
 
--- [BYPASS] RUNTIME LOOP
-RunService.RenderStepped:Connect(function()
+--=========================
+-- 🚀 BYPASS RUNTIME (FIXED SPEED)
+--=========================
+RunService.Stepped:Connect(function()
     if lp.Character and lp.Character:FindFirstChild("Humanoid") then
-        if Config.SpeedEnabled then
-            -- Bypass แบบต่อเนื่องเพื่อลดอาการวาร์ป
-            lp.Character.Humanoid.WalkSpeed = Config.Speed
-        else
-            -- Reset ความเร็วเมื่อปิด
-            if lp.Character.Humanoid.WalkSpeed ~= 16 then
-                lp.Character.Humanoid.WalkSpeed = 16
-            end
+        local hum = lp.Character.Humanoid
+        
+        if Config.SpeedEnabled and not isHiding then
+            -- Bypass แบบใช้วิธีล็อคค่าตรงๆ (กัน Rubberband)
+            hum.WalkSpeed = Config.Speed
+        elseif not isHiding then
+            -- Reset ความเร็วเมื่อปิดทันที
+            if hum.WalkSpeed ~= 16 then hum.WalkSpeed = 16 end
         end
     end
     
     if Config.Fullbright then 
-         Lighting.Brightness = 2; Lighting.FogEnd = 9e9; Lighting.GlobalShadows = false 
+        Lighting.Brightness = 2; Lighting.FogEnd = 9e9; Lighting.GlobalShadows = false 
     end
 end)
+
 
 
 

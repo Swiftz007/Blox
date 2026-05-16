@@ -7,7 +7,7 @@ local InterfaceManager = loadstring(game:HttpGet("https://raw.githubusercontent.
 --=========================
 local Window = Fluent:CreateWindow({
 Title = "Reaper Hub",
-SubTitle = "Doors Beta",
+SubTitle = "Doors Beta", --2
 TabWidth = 160,
 Size = UDim2.fromOffset(520, 360),
 Theme = "Reaper",
@@ -124,6 +124,16 @@ local lp = game.Players.LocalPlayer
 local RunService = game:GetService("RunService")
 local Lighting = game:GetService("Lighting")
 
+-- ฟังก์ชันเรียกใช้ ProximityPrompt แบบปลอดภัย
+local function SafePrompt(v)
+    if typeof(fireproximityprompt) == "function" then
+        fireproximityprompt(v)
+    else
+        -- Fallback สำหรับ Executor ที่ไม่มี fireproximityprompt
+        v:InputBegan(Enum.UserInputType.MouseButton1)
+    end
+end
+
 --=========================
 -- 🛡️ CORE LOGIC (OPTIMIZED)
 --=========================
@@ -141,12 +151,12 @@ task.spawn(function()
                 if p then
                     local dist = (hrp.Position - (p:IsA("Model") and p:GetPivot().Position or p.Position)).Magnitude
                     if dist < 15 then
-                        -- Auto Unlock (ถ้ามีกุญแจและเดินชน)
+                        -- Auto Unlock
                         if Config.AutoUnlock and hasKey and (v.ActionText == "Unlock" or v.ObjectText == "Locked Door") then
-                            fireproximityprompt(v)
-                        -- Auto Loot (ทอง/กุญแจ/หนังสือ)
+                            SafePrompt(v)
+                        -- Auto Loot
                         elseif Config.AutoLoot and (v.ObjectText == "Gold" or v.ObjectText == "Key" or p.Name == "KeyObtain" or p.Name == "LiveHintBook") then
-                            fireproximityprompt(v)
+                            SafePrompt(v)
                         end
                     end
                 end
@@ -195,18 +205,16 @@ end)
 -- 🏠 CONNECT TO UI TABS
 --=========================
 
--- MAIN TAB
 Tabs.Main:AddToggle("AutoHide", {Title = "Auto-Hide (Mines/Floor 1)", Default = false}):OnChanged(function(v) Config.AutoHide = v end)
 Tabs.Main:AddToggle("AutoLoot", {Title = "Auto Loot (Gold/Items)", Default = false}):OnChanged(function(v) Config.AutoLoot = v end)
 Tabs.Main:AddToggle("AutoUnlock", {Title = "Auto Unlock (ชนแล้วไข)", Default = false}):OnChanged(function(v) Config.AutoUnlock = v end)
 
--- PLAYER TAB
 Tabs.Player:AddToggle("SpeedToggle", {Title = "Enable Speed", Default = false}):OnChanged(function(v) Config.SpeedEnabled = v end)
 Tabs.Player:AddSlider("SpeedSlider", {Title = "WalkSpeed", Default = 22, Min = 16, Max = 45, Rounding = 1, Callback = function(v) Config.Speed = v end})
 Tabs.Player:AddToggle("Fullbright", {Title = "Fullbright (No Fog)", Default = false}):OnChanged(function(v) Config.Fullbright = v end)
 
--- ESP TAB
-Tabs.ESP:AddToggle("ED", {Title = "Show Doors", Default = false}):OnChanged(function(v) Config.ESP.Doors = v v end)
+-- แก้ไขจุดที่เคย Error (v v) เรียบร้อยแล้ว
+Tabs.ESP:AddToggle("ED", {Title = "Show Doors", Default = false}):OnChanged(function(v) Config.ESP.Doors = v end)
 Tabs.ESP:AddToggle("EI", {Title = "Show Items", Default = false}):OnChanged(function(v) Config.ESP.Items = v end)
 Tabs.ESP:AddToggle("EE", {Title = "Show Entities", Default = false}):OnChanged(function(v) Config.ESP.Entities = v end)
 
@@ -219,8 +227,6 @@ RunService.RenderStepped:Connect(function()
         Lighting.Brightness = 2; Lighting.FogEnd = 9e9; Lighting.GlobalShadows = false 
     end
 end)
-
-
 
 
 

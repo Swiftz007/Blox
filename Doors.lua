@@ -7,7 +7,7 @@ local InterfaceManager = loadstring(game:HttpGet("https://raw.githubusercontent.
 --=========================
 local Window = Fluent:CreateWindow({
 Title = "Reaper Hub",
-SubTitle = "Doors Beta", -- 6
+SubTitle = "Doors Beta", -- 7
 TabWidth = 160,
 Size = UDim2.fromOffset(520, 360),
 Theme = "Reaper",
@@ -135,16 +135,17 @@ local function SafePrompt(v)
 end
 
 --=========================
--- 🛡️ CORE LOGIC (V4 RE-CODED)
+-- 🛡️ CORE LOGIC (V6 - PSEUDO GODMODE)
 --=========================
 
--- 1. SMART AUTO LOOT & UNLOCK (Fixed for Drawers & Ghost Keys)
+-- 1. SMART AUTO LOOT & UNLOCK (Drawer Fix & Key Priority)
 task.spawn(function()
     while task.wait(0.1) do
         if not lp.Character or not lp.Character:FindFirstChild("HumanoidRootPart") then continue end
         local hrp = lp.Character.HumanoidRootPart
         local char = lp.Character
-        local hasKey = char:FindFirstChild("Key") or lp.Backpack:FindFirstChild("Key") or char:FindFirstChild("LibraryKey") or char:FindFirstChild("KeyCard")
+        local hasKey = char:FindFirstChild("Key") or lp.Backpack:FindFirstChild("Key") or 
+                       char:FindFirstChild("LibraryKey") or char:FindFirstChild("KeyCard")
 
         for _, v in pairs(workspace:GetDescendants()) do
             if v:IsA("ProximityPrompt") then
@@ -152,26 +153,23 @@ task.spawn(function()
                 if not p then continue end
                 
                 local dist = (hrp.Position - p:GetPivot().Position).Magnitude
-                if dist < 18 then
-                    -- [AUTO UNLOCK] - เจาะจง Proximity ที่มีคำว่า Unlock หรือเป็น Lock Model
+                if dist < 20 then
+                    -- [AUTO UNLOCK] - ไขประตู
                     if Config.AutoUnlock and hasKey then
-                        if v.ActionText == "Unlock" or v.ObjectText == "Locked Door" or p.Name == "Lock" or p.Name == "KeyHole" then
+                        if v.ActionText:find("Unlock") or v.ObjectText:find("Door") or p.Name == "Lock" then
                             SafePrompt(v)
                         end
                     end
 
-                    -- [AUTO LOOT] - ปรับปรุงการเก็บของในลิ้นชัก
+                    -- [AUTO LOOT] - เปิดลิ้นชักและเก็บของทันที
                     if Config.AutoLoot then
-                        -- เก็บทองและกุญแจ (กรองชื่อเฉพาะกันบัค)
-                        if v.ObjectText == "Gold" or v.ObjectText == "Key" or v.ObjectText == "Keycard" or p.Name == "KeyObtain" or p.Name:find("GoldPile") then
+                        -- เก็บทอง/กุญแจ (กรองให้แม่นยำขึ้น)
+                        if v.ObjectText == "Gold" or v.ObjectText == "Key" or p.Name == "KeyObtain" or p.Name:find("GoldPile") then
                             SafePrompt(v)
                         end
-                        
-                        -- เปิดตู้/ลิ้นชัก อัตโนมัติ (เพื่อให้ของข้างในโผล่มา)
-                        if v.ActionText == "Open" then
-                            if p.Name == "DrawerContainer" or p.Name == "ChestBox" or p:FindFirstChild("Knob") then
-                                SafePrompt(v)
-                            end
+                        -- Force Open (ลิ้นชัก/ตู้)
+                        if v.ActionText == "Open" and (p.Name:find("Drawer") or p.Name:find("Chest")) then
+                            SafePrompt(v)
                         end
                     end
                 end
@@ -180,108 +178,95 @@ task.spawn(function()
     end
 end)
 
--- 2. AUTO HIDE (FIXED: DEPTH & POSITION LOCK)
+-- 2. AUTO HIDE (PSEUDO-GODMODE: SAFE DEPTH + NO HITBOX)
 local isHiding = false
 local lastPos = nil
 
-local function HidePlayer()
-    if isHiding or not Config.AutoHide then return end
+local function ToggleGodmode(state)
     local char = lp.Character
-    local hrp = char and char:FindFirstChild("HumanoidRootPart")
-    if hrp then
-        isHiding = true
-        lastPos = hrp.CFrame
-        hrp.Anchored = true
-        hrp.CFrame = lastPos * CFrame.new(0, -60, 0) -- มุดลึกกว่าเดิม
-        for _, part in pairs(char:GetDescendants()) do
-            if part:IsA("BasePart") then part.CanCollide = false end
+    if not char then return end
+    for _, part in pairs(char:GetDescendants()) do
+        if part:IsA("BasePart") then
+            part.CanCollide = not state
+            part.CanTouch = not state -- ปิดการรับดาเมจจาก Hitbox ม็อบ
         end
-    end
-end
-
-local function UnhidePlayer()
-    local char = lp.Character
-    local hrp = char and char:FindFirstChild("HumanoidRootPart")
-    if hrp and isHiding then
-        hrp.CFrame = lastPos
-        task.wait(0.1)
-        hrp.Anchored = false
-        for _, part in pairs(char:GetDescendants()) do
-            if part:IsA("BasePart") then part.CanCollide = true end
-        end
-        isHiding = false
-        lastPos = nil
     end
 end
 
 workspace.ChildAdded:Connect(function(child)
     local entities = {"RushMoving", "AmbushMoving", "A60", "A120", "Blitz", "Haste"}
-    for _, name in pairs(entities) do
-        if child.Name:find(name) then
-            Notify("ENTITY SPAWNED!", name:upper() .. " IS COMING!")
-            HidePlayer()
+    local isMonster = false
+    for _, name in pairs(entities) do if child.Name:find(name) then isMonster = true break end end
+
+    if isMonster and Config.AutoHide and not isHiding then
+        local hrp = lp.Character and lp.Character:FindFirstChild("HumanoidRootPart")
+        if hrp then
+            isHiding = true
+            lastPos = hrp.CFrame
+            Notify("GODMODE ACTIVE", child.Name:upper() .. " IS PASSING")
+            
+            -- มุดในระยะ "Safe-Z" (-12 Studs) ระยะนี้ไม่โดนจั๊มสแกร์และ Glitch ไม่ลากกลับ
+            hrp.Anchored = true
+            hrp.CFrame = lastPos * CFrame.new(0, -12, 0)
+            ToggleGodmode(true)
+            
             child.Destroying:Wait()
-            task.wait(0.5)
-            UnhidePlayer()
-            break
+            task.wait(0.5) -- Safety Buffer
+            
+            hrp.CFrame = lastPos
+            hrp.Anchored = false
+            ToggleGodmode(false)
+            isHiding = false
+            Notify("SAFE", "Godmode Deactivated")
         end
     end
 end)
 
--- 3. ESP SYSTEM (FIXED: NO DUPLICATE & REFINED FILTERS)
+-- 3. ESP SYSTEM (STABLE & NO GHOST TAGS)
 local function ApplyESP(obj, name, color)
-    if obj:FindFirstChild("ReaperESP") then return end -- ป้องกันการสร้างซ้ำ
+    if obj:FindFirstChild("ReaperESP") then return end
     local bgui = Instance.new("BillboardGui", obj)
-    bgui.Name = "ReaperESP"; bgui.AlwaysOnTop = true; bgui.Size = UDim2.new(0, 80, 0, 40); bgui.DistanceLowerLimit = 0
+    bgui.Name = "ReaperESP"; bgui.AlwaysOnTop = true; bgui.Size = UDim2.new(0, 80, 0, 40)
     local tl = Instance.new("TextLabel", bgui)
     tl.Size = UDim2.new(1,0,1,0); tl.BackgroundTransparency = 1; tl.Text = name; tl.TextColor3 = color; tl.TextScaled = true; tl.Font = Enum.Font.SourceSansBold
 end
 
 task.spawn(function()
-    while task.wait(1) do
+    while task.wait(1.5) do
         for _, v in pairs(workspace:GetDescendants()) do
-            -- ลบ ESP ทันทีถ้าปิดการใช้งาน
+            -- Cleanup ถ้าปิด
             if v.Name == "ReaperESP" then
                 local p = v.Parent
-                if not p or (not Config.ESP.Doors and p.Name == "Door") or 
-                   (not Config.ESP.Keys and (p.Name == "KeyObtain" or p.Name:find("Key"))) or
-                   (not Config.ESP.Books and p.Name == "LiveHintBook") or
-                   (not Config.ESP.Entities and (p.Name == "RushMoving" or p.Name == "AmbushMoving" or p.Name == "Figure")) then
-                    v:Destroy()
-                end
+                if not p or not (Config.ESP.Doors or Config.ESP.Keys or Config.ESP.Books or Config.ESP.Entities) then v:Destroy() end
                 continue
             end
-            
-            -- แยกประเภท (กรองชื่อเฉพาะเพื่อกัน Ghost Item)
+            -- Filter
             if Config.ESP.Keys and (v.Name == "KeyObtain" or v.Name == "LibraryKey" or v.Name == "KeyCard") then
-                ApplyESP(v, "KEY", Color3.fromRGB(255, 255, 0))
+                ApplyESP(v, "KEY", Color3.new(1, 1, 0))
             elseif Config.ESP.Books and v.Name == "LiveHintBook" then
-                ApplyESP(v, "BOOK", Color3.fromRGB(0, 255, 255))
+                ApplyESP(v, "BOOK", Color3.new(0, 1, 1))
             elseif Config.ESP.Doors and v.Name == "Door" and v:IsA("Model") then
-                ApplyESP(v, "DOOR", Color3.fromRGB(0, 255, 0))
-            elseif Config.ESP.Entities and (v.Name == "RushMoving" or v.Name == "AmbushMoving" or v.Name == "Figure" or v.Name == "Seek") then
-                ApplyESP(v, "!!! ENTITY !!!", Color3.fromRGB(255, 0, 0))
+                ApplyESP(v, "DOOR", Color3.new(0, 1, 0))
+            elseif Config.ESP.Entities and (v.Name == "RushMoving" or v.Name == "AmbushMoving" or v.Name == "Figure") then
+                ApplyESP(v, "ENTITY", Color3.new(1, 0, 0))
             end
         end
     end
 end)
 
 --=========================
--- 🚀 SPEED BYPASS (FIXED RUBBERBAND)
+-- 🚀 SPEED BYPASS (HEARTBEAT SMOOTH)
 --=========================
-RunService.Stepped:Connect(function()
+RunService.Heartbeat:Connect(function(dt)
     if lp.Character and lp.Character:FindFirstChild("Humanoid") and lp.Character:FindFirstChild("HumanoidRootPart") then
         local hum = lp.Character.Humanoid
         local hrp = lp.Character.HumanoidRootPart
         
         if Config.SpeedEnabled and not isHiding then
-            -- ใช้การเขียนความเร็วแบบผสม (กันดีด)
-            hum.WalkSpeed = Config.Speed
-            if hrp.Velocity.Magnitude > Config.Speed + 5 then
-                hrp.Velocity = hrp.Velocity.Unit * Config.Speed
+            -- ใช้ Delta-Time Calculation เพื่อให้เดินลื่นไหล 100% ไม่วาร์ป
+            if hum.MoveDirection.Magnitude > 0 then
+                hrp.CFrame = hrp.CFrame + (hum.MoveDirection * (Config.Speed - 16) * dt)
             end
-        elseif not isHiding then
-            if hum.WalkSpeed ~= 16 then hum.WalkSpeed = 16 end
         end
     end
     
@@ -289,22 +274,6 @@ RunService.Stepped:Connect(function()
         Lighting.Brightness = 2; Lighting.FogEnd = 9e9; Lighting.GlobalShadows = false 
     end
 end)
-
---=========================
--- 🏠 UI CONNECTS
---=========================
-Tabs.Main:AddToggle("AutoHide", {Title = "Auto-Hide (Safe)", Default = false}):OnChanged(function(v) Config.AutoHide = v end)
-Tabs.Main:AddToggle("AutoLoot", {Title = "Auto Loot (Drawers)", Default = false}):OnChanged(function(v) Config.AutoLoot = v end)
-Tabs.Main:AddToggle("AutoUnlock", {Title = "Auto Unlock", Default = false}):OnChanged(function(v) Config.AutoUnlock = v end)
-
-Tabs.Player:AddToggle("SpeedToggle", {Title = "Enable Speed Bypass", Default = false}):OnChanged(function(v) Config.SpeedEnabled = v end)
-Tabs.Player:AddSlider("SpeedSlider", {Title = "WalkSpeed", Default = 22, Min = 16, Max = 45, Rounding = 1, Callback = function(v) Config.Speed = v end})
-Tabs.Player:AddToggle("Fullbright", {Title = "Fullbright", Default = false}):OnChanged(function(v) Config.Fullbright = v end)
-
-Tabs.ESP:AddToggle("ED", {Title = "Show Doors", Default = false}):OnChanged(function(v) Config.ESP.Doors = v end)
-Tabs.ESP:AddToggle("EK", {Title = "Show Keys", Default = false}):OnChanged(function(v) Config.ESP.Keys = v end)
-Tabs.ESP:AddToggle("EB", {Title = "Show Books", Default = false}):OnChanged(function(v) Config.ESP.Books = v end)
-Tabs.ESP:AddToggle("EE", {Title = "Show Entities", Default = false}):OnChanged(function(v) Config.ESP.Entities = v end)
 
 
 

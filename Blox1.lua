@@ -4,6 +4,7 @@ local Fluent = loadstring(game:HttpGet("https://raw.githubusercontent.com/Swiftz
 local SaveManager = loadstring(game:HttpGet("https://raw.githubusercontent.com/Swiftz007/Advanced/refs/heads/main/SaveManager.lua"))()
 local InterfaceManager = loadstring(game:HttpGet("https://raw.githubusercontent.com/Swiftz007/Advanced/refs/heads/main/InterfaceManager.lua"))()
 
+local attack = loadstring(game:HttpGet("https://raw.githubusercontent.com/Swiftz007/Libblox/refs/heads/main/libattack.lua"))()
 
 --=========================
 -- 🔥 SERVICES

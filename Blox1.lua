@@ -42,25 +42,43 @@ Settings = Window:AddTab({ Title = "Settings", Icon = "settings" })
 }
 
 --=========================
--- [เพิ่มส่วนนี้] GLOBAL VARIABLES & DATA
+-- 🔥 GLOBAL VARIABLES
 --=========================
 _G.AutoFarm = false
 _G.SelectWeapon = "Melee"
 local World1 = game.PlaceId == 2753915549
-local Mon, LevelQuest, NameQuest, NameMon, CFrameQuest, CFrameMon -- สำหรับเก็บค่าจาก CheckQuest
+local Mon, LevelQuest, NameQuest, NameMon, CFrameQuest, CFrameMon
+local CurrentTween
 
 --=========================
--- 🛠 [เพิ่มส่วนนี้] SUPPORT FUNCTIONS
+-- 🛠 SUPPORT FUNCTIONS
 --=========================
-local function TweenTo(Pos)
+local function TweenTo(Pos, CustomSpeed)
     local Root = LP.Character:FindFirstChild("HumanoidRootPart")
-    if not Root or not _G.AutoFarm then return end
+    if not Root or not _G.AutoFarm then 
+        if CurrentTween then CurrentTween:Cancel() end
+        return 
+    end
     
     local Distance = (Pos.Position - Root.Position).Magnitude
-    local Speed = 300
-    local Tween = game:GetService("TweenService"):Create(Root, TweenInfo.new(Distance/Speed, Enum.EasingStyle.Linear), {CFrame = Pos})
-    Tween:Play()
-    return Tween
+    if Distance < 5 then 
+        if CurrentTween then CurrentTween:Cancel() end
+        return 
+    end
+
+    -- [FIXED] สั่งหยุดของเก่าทันทีเพื่อเริ่ม Tween ใหม่ (ทำให้ตอบสนองไวขึ้น)
+    if CurrentTween then CurrentTween:Cancel() end
+
+    local Speed = CustomSpeed or 300
+    local TargetCFrame = Pos
+    
+    -- [FIXED] กันจมน้ำ: ถ้าไกลเกิน 500 บินสูงทันที
+    if Distance > 500 then
+        TargetCFrame = CFrame.new(Pos.X, 500, Pos.Z)
+    end
+
+    CurrentTween = TS:Create(Root, TweenInfo.new(Distance/Speed, Enum.EasingStyle.Linear), {CFrame = TargetCFrame})
+    CurrentTween:Play()
 end
 
 local function EquipWeapon()
@@ -75,7 +93,7 @@ local function EquipWeapon()
 end
 
 --=========================
--- 📜 [เพิ่มส่วนนี้] YOUR CHECKQUEST FUNCTION
+-- 📜 CHECKQUEST DATA
 --=========================
 function CheckQuest() 
     local MyLevel = LP.Data.Level.Value
@@ -163,25 +181,18 @@ function CheckQuest()
 end
 
 --=========================
--- 🛡 NOCLIP SYSTEM (ON FARM ONLY)
+-- 🛡 NOCLIP SYSTEM
 --=========================
 RunService.Stepped:Connect(function()
     if _G.AutoFarm and LP.Character then
         for _, v in pairs(LP.Character:GetDescendants()) do
-            if v:IsA("BasePart") and v.CanCollide == true then
-                v.CanCollide = false
-            end
+            if v:IsA("BasePart") then v.CanCollide = false end
         end
     end
 end)
 
 
---=========================
--- 🏠 MAIN TAB ELEMENTS
---=========================
-Tabs.Main:AddParagraph({ Title = "Level Farm", Content = "เลือกอาวุธและเปิด Auto Farm" })
-
-local WeaponDropdown = Tabs.Main:AddDropdown("WeaponSelect", {
+Tabs.Main:AddDropdown("WeaponSelect", {
     Title = "Select Weapon",
     Values = {"Melee", "Sword", "Fruit", "Gun"},
     Default = "Melee",
@@ -195,36 +206,46 @@ Tabs.Main:AddToggle("AutoFarmLevel", {
 })
 
 --=========================
--- 🔄 [เพิ่มส่วนนี้] FARMING LOOP
+-- 🔄 MAIN FARMING LOOP
 --=========================
 task.spawn(function()
     while task.wait() do
         if _G.AutoFarm then
             pcall(function()
-                CheckQuest() -- ดึงข้อมูลตำแหน่งมอน/NPC
+                CheckQuest() 
                 
                 local HasQuest = LP.PlayerGui.Main.Quest.Visible
                 
                 if not HasQuest then
-                    -- ไปรับเควส
-                    TweenTo(CFrameQuest)
-                    if (CFrameQuest.Position - LP.Character.HumanoidRootPart.Position).Magnitude < 10 then
+                    TweenTo(CFrameQuest, 300)
+                    if (CFrameQuest.Position - LP.Character.HumanoidRootPart.Position).Magnitude < 15 then
+                        if CurrentTween then CurrentTween:Cancel() end
+                        task.wait(0.1)
                         game:GetService("ReplicatedStorage").Remotes.CommF_:InvokeServer("StartQuest", NameQuest, LevelQuest)
                     end
                 else
-                    -- ไปตีมอน
                     local Target = workspace.Enemies:FindFirstChild(Mon) or workspace.Camera:FindFirstChild(Mon)
                     
                     if Target and Target:FindFirstChild("HumanoidRootPart") and Target.Humanoid.Health > 0 then
+                        local RootPos = LP.Character.HumanoidRootPart.Position
+                        local MonsterPos = Target.HumanoidRootPart.Position
+                        local DistToMon = (MonsterPos - RootPos).Magnitude
+                        
                         EquipWeapon()
-                        LP.Character.HumanoidRootPart.CFrame = Target.HumanoidRootPart.CFrame * CFrame.new(0, 10, 0)
-                        -- Fast Attack ของคุณจะทำงานตรงนี้
+
+                        if DistToMon > 150 then
+                            TweenTo(Target.HumanoidRootPart.CFrame * CFrame.new(0, 10, 0), 300)
+                        else
+                            -- [FIXED] ใช้พารามิเตอร์ 1500 เข้า TweenTo โดยตรงเพื่อให้ยกเลิก Tween เก่าอัตโนมัติ
+                            TweenTo(Target.HumanoidRootPart.CFrame * CFrame.new(0, 10, 0), 1500)
+                        end
                     else
-                        -- มอนตาย/ยังไม่เกิด
-                        TweenTo(CFrameMon)
+                        TweenTo(CFrameMon, 300)
                     end
                 end
             end)
+        else
+            if CurrentTween then CurrentTween:Cancel() end
         end
     end
 end)

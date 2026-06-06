@@ -1,3 +1,4 @@
+local success, result = pcall(function()
 loadstring(game:HttpGet("https://raw.githubusercontent.com/hdanhhub/hdanhhub/refs/heads/main/fixlagbyhdanh.lua"))()
 loadstring(game:HttpGet("https://raw.githubusercontent.com/AnhDangNhoEm/TuanAnhIOS/refs/heads/main/koby"))()
 
@@ -11325,6 +11326,12 @@ pcall(function()
     })
 end)
 
+
+end)
+
+if not success then
+    warn("Reaper Hub Error: " .. tostring(result))
+end
 
 -- Load Success rbxassetid://86279908104891
 task.wait(2)

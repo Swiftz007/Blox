@@ -1,4 +1,4 @@
-local success, result = pcall(function()
+local success, result = pcall(function() --1
 loadstring(game:HttpGet("https://raw.githubusercontent.com/hdanhhub/hdanhhub/refs/heads/main/fixlagbyhdanh.lua"))()
 loadstring(game:HttpGet("https://raw.githubusercontent.com/AnhDangNhoEm/TuanAnhIOS/refs/heads/main/koby"))()
 
@@ -11146,6 +11146,7 @@ spawn(function()
     end
 end)
 
+-- Setup GUI
 ToggleButton.Name = "BananaCatToggle"
 -- ===============================================================
 -- TOGGLE BUTTON - CLEAN CIRCULAR DESIGN
@@ -11174,7 +11175,7 @@ ToggleButton.BackgroundTransparency = 1
 ToggleButton.BorderSizePixel = 0
 ToggleButton.Position = UDim2.new(0.01, 0, 0.5, 0)
 ToggleButton.Size = UDim2.new(0, 45, 0, 45)
-ToggleButton.Image = "rbxassetid://86279908104891"
+ToggleButton.Image = "rbxassetid://123613996022560"
 ToggleButton.ScaleType = Enum.ScaleType.Fit
 ToggleButton.Active = true
 ToggleButton.Draggable = true
@@ -11326,8 +11327,7 @@ pcall(function()
     })
 end)
 
-
-end)
+print("Toggle button created successfully")
 
 if not success then
     warn("Reaper Hub Error: " .. tostring(result))

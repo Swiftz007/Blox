@@ -1,3 +1,5 @@
+local Load = loadstring(game:HttpGet("https://raw.githubusercontent.com/Swiftz007/Libwtf/refs/heads/main/LoadLib.lua"))()
+
 loadstring(game:HttpGet("https://raw.githubusercontent.com/hdanhhub/hdanhhub/refs/heads/main/fixlagbyhdanh.lua"))()
 loadstring(game:HttpGet("https://raw.githubusercontent.com/AnhDangNhoEm/TuanAnhIOS/refs/heads/main/koby"))()
 
@@ -175,7 +177,6 @@ local vu3 = {
     ["Stats"] = v2:AddTab({ ["Title"] = "Stats" }),
     ["Player"] = v2:AddTab({ ["Title"] = "Player" }),
     ["Teleport"] = v2:AddTab({ ["Title"] = "Teleport" }),
-    ["Visual"] = v2:AddTab({ ["Title"] = "Visuals/Fake" }),
     ["Fruit"] = v2:AddTab({ ["Title"] = "Devil Fruit" }),
     ["Raid"] = v2:AddTab({ ["Title"] = "Raid" }),
     ["Race"] = v2:AddTab({ ["Title"] = "Race V4" }),
@@ -8290,7 +8291,7 @@ function InfAb()
     end
 end
 vu3.Player:AddToggle("ToggleNoClip", {
-    ["Title"] = "Đi Xuyên Tường",
+    ["Title"] = "Noclip",
     ["Description"] = "",
     ["Default"] = true
 }):OnChanged(function(p910)
@@ -8335,7 +8336,7 @@ spawn(function()
 end)
 local vu916 = vu3.Teleport:AddSection("Thế Gi\225\187\155i")
 vu3.Teleport:AddToggle("ToggleAutoSea2", {
-    ["Title"] = "Nhiệm V\225\187\165 Qua Biển 2",
+    ["Title"] = "Auto Sea 2",
     ["Description"] = "",
     ["Default"] = false
 }):OnChanged(function(p917)
@@ -8408,7 +8409,7 @@ spawn(function()
     end
 end)
 vu3.Teleport:AddToggle("ToggleAutoSea3", {
-    ["Title"] = "Nhiệm V\225\187\165 Qua Biển 3",
+    ["Title"] = "Auto Sea 3",
     ["Description"] = "",
     ["Default"] = false
 }):OnChanged(function(p923)
@@ -8462,27 +8463,27 @@ spawn(function()
     end
 end)
 vu3.Teleport:AddButton({
-    ["Title"] = "Biển 1",
+    ["Title"] = "Sea 1",
     ["Description"] = "",
     ["Callback"] = function()
         game:GetService("ReplicatedStorage").Remotes.CommF_:InvokeServer("TravelMain")
     end
 })
 vu3.Teleport:AddButton({
-    ["Title"] = "Biển 2",
+    ["Title"] = "Sea 2",
     ["Description"] = "",
     ["Callback"] = function()
         game:GetService("ReplicatedStorage").Remotes.CommF_:InvokeServer("TravelDressrosa")
     end
 })
 vu3.Teleport:AddButton({
-    ["Title"] = "Biển 3",
+    ["Title"] = "Sea 3",
     ["Description"] = "",
     ["Callback"] = function()
         game:GetService("ReplicatedStorage").Remotes.CommF_:InvokeServer("TravelZou")
     end
 })
-vu3.Teleport:AddSection("\239\191\189ảo")
+vu3.Teleport:AddSection("TpIsland")
 if Sea1 then
     IslandList = {
         "WindMill",
@@ -8542,7 +8543,7 @@ elseif Sea3 then
     }
 end
 local v928 = vu3.Teleport:AddDropdown("DropdownIsland", {
-    ["Title"] = "Chọn Đảo",
+    ["Title"] = "Select Island",
     ["Description"] = "",
     ["Values"] = IslandList,
     ["Multi"] = false,
@@ -8553,7 +8554,7 @@ v928:OnChanged(function(p929)
     _G.SelectIsland = p929
 end)
 vu3.Teleport:AddButton({
-    ["Title"] = "Bay Đến Đảo",
+    ["Title"] = "Teleport Island",
     ["Description"] = "",
     ["Callback"] = function()
         if _G.SelectIsland ~= "WindMill" then
@@ -8755,89 +8756,8 @@ vu3.Teleport:AddButton({
         end
     end
 })
-vu3.Visual:AddButton({
-    ["Title"] = "Giả",
-    ["Description"] = "",
-    ["Callback"] = function()
-        local v930 = game:GetService("Players").LocalPlayer
-        local v931 = require(game:GetService("ReplicatedStorage").Notification)
-        local v932 = v930:WaitForChild("Data")
-        local v933 = require(game.ReplicatedStorage:WaitForChild("EXPFunction"))
-        local v934 = require(game:GetService("ReplicatedStorage").Effect.Container.LevelUp)
-        local v935 = require(game:GetService("ReplicatedStorage").Util.Sound)
-        local v936 = game:GetService("ReplicatedStorage").Util.Sound.Storage.Other:FindFirstChild("LevelUp_Proxy") or game:GetService("ReplicatedStorage").Util.Sound.Storage.Other:FindFirstChild("LevelUp")
-        function v129(p937)
-            repeat
-                local v938
-                p937, v938 = string.gsub(p937, "^(-?%d+)(%d%d%d)", "%1,%2")
-            until v938 == 0
-            return p937
-        end
-        v931.new("<Color=Yellow>QUEST COMPLETED!<Color=/>"):Display()
-        v931.new("Earned<Color=Yellow>9,999,999,999,999 Exp.<Color=/>(+None)"):Display()
-        v931.new("Earned<Color=Green>$9,999,999,999,999<Color=/>"):Display()
-        v930.Data.Exp.Value = 999999999999
-        v930.Data.Beli.Value = v930.Data.Beli.Value + 999999999999
-        delay = 0
-        count = 0
-        while v930.Data.Exp.Value - v933(v932.Level.Value) > 0 do
-            v930.Data.Exp.Value = v930.Data.Exp.Value - v933(v932.Level.Value)
-            v930.Data.Level.Value = v930.Data.Level.Value + 1
-            v930.Data.Points.Value = v930.Data.Points.Value + 3
-            v934({
-                v930
-            })
-            v935:Play(v936.Value)
-            v931.new("<Color=Green>LEVEL UP!<Color=/>(" .. v930.Data.Level.Value .. ")"):Display()
-            count = count + 1
-            if count >= 5 then
-                delay = tick()
-                count = 0
-                wait()
-            end
-        end
-    end
-})
-vu3.Visual:AddInput("Input_Level", {
-    ["Title"] = "Cấp",
-    ["Default"] = "",
-    ["Placeholder"] = "Nhắp",
-    ["Numeric"] = false,
-    ["Finished"] = false,
-    ["Callback"] = function(p939)
-        game:GetService("Players").LocalPlayer.Data.Level.Value = tonumber(p939)
-    end
-})
-vu3.Visual:AddInput("Input_EXP", {
-    ["Title"] = "Kinh Nghiậm",
-    ["Default"] = "",
-    ["Placeholder"] = "Nhắp",
-    ["Numeric"] = false,
-    ["Finished"] = false,
-    ["Callback"] = function(p940)
-        game:GetService("Players").LocalPlayer.Data.Exp.Value = tonumber(p940)
-    end
-})
-vu3.Visual:AddInput("Input_Beli", {
-    ["Title"] = "Tiền",
-    ["Default"] = "",
-    ["Placeholder"] = "Nhắp",
-    ["Numeric"] = false,
-    ["Finished"] = false,
-    ["Callback"] = function(p941)
-        game:GetService("Players").LocalPlayer.Data.Beli.Value = tonumber(p941)
-    end
-})
-vu3.Visual:AddInput("Input_Fragments", {
-    ["Title"] = "\239\191\189iểm F",
-    ["Default"] = "",
-    ["Placeholder"] = "Nhắp",
-    ["Numeric"] = false,
-    ["Finished"] = false,
-    ["Callback"] = function(p942)
-        game:GetService("Players").LocalPlayer.Data.Fragments.Value = tonumber(p942)
-    end
-})
+
+
 local v943 = game.ReplicatedStorage:FindFirstChild("Remotes").CommF_:InvokeServer("GetFruits")
 Table_DevilFruitSniper = {}
 ShopDevilSell = {}
@@ -8859,7 +8779,7 @@ _G.PermanentFruit = nil
 _G.AutoBuyFruitSniper = false
 _G.AutoSwitchPermanentFruit = false
 local v947 = vu3.Fruit:AddDropdown("DropdownFruit", {
-    ["Title"] = "Chọn Trái",
+    ["Title"] = "Select Fruit",
     ["Description"] = "",
     ["Values"] = Table_DevilFruitSniper,
     ["Multi"] = false,
@@ -8870,7 +8790,7 @@ v947:OnChanged(function(p948)
     _G.SelectFruit = p948
 end)
 vu3.Fruit:AddToggle("ToggleFruit", {
-    ["Title"] = "Mua Trái Chọn",
+    ["Title"] = "Buy Fruit",
     ["Description"] = "",
     ["Default"] = false
 }):OnChanged(function(p949)
@@ -8885,7 +8805,7 @@ vu3.Fruit:AddToggle("ToggleFruit", {
 end)
 vu4.ToggleFruit:SetValue(false)
 local v950 = vu3.Fruit:AddDropdown("DropdownPermanentFruit", {
-    ["Title"] = "Chọn Trái V\196\169nh Viễn",
+    ["Title"] = "Select Permanent Fruit",
     ["Description"] = "",
     ["Values"] = Table_DevilFruitSniper,
     ["Multi"] = false,
@@ -8896,7 +8816,7 @@ v950:OnChanged(function(p951)
     _G.PermanentFruit = p951
 end)
 vu3.Fruit:AddToggle("TogglePermanentFruit", {
-    ["Title"] = "\239\191\189\225\187\149i Trái V\196\169nh Viễn",
+    ["Title"] = "Equip Permanent Fruit",
     ["Description"] = "",
     ["Default"] = false
 }):OnChanged(function(p952)
@@ -8914,7 +8834,7 @@ vu3.Fruit:AddToggle("TogglePermanentFruit", {
 end)
 vu4.TogglePermanentFruit:SetValue(false)
 vu3.Fruit:AddToggle("ToggleStore", {
-    ["Title"] = "Lưu Trái",
+    ["Title"] = "Auto Store Fruits",
     ["Description"] = "",
     ["Default"] = false
 }):OnChanged(function(p954)
@@ -9035,7 +8955,7 @@ spawn(function()
     end
 end)
 vu3.Fruit:AddToggle("ToggleRandomFruit", {
-    ["Title"] = "Random Trái",
+    ["Title"] = "Random Fruit",
     ["Description"] = "",
     ["Default"] = false
 }):OnChanged(function(p955)
@@ -9052,7 +8972,7 @@ spawn(function()
     end)
 end)
 vu3.Fruit:AddToggle("ToggleCollectTP", {
-    ["Title"] = "Bay Đến Trái",
+    ["Title"] = "TP to Fruit",
     ["Description"] = "",
     ["Default"] = false
 }):OnChanged(function(p956)
@@ -9077,7 +8997,7 @@ spawn(function()
     end
 end)
 vu3.Fruit:AddToggle("ToggleCollect", {
-    ["Title"] = "D\225\187\139ch Chuyển Đến Trái",
+    ["Title"] = "Tween To Fruit",
     ["Description"] = "",
     ["Default"] = false
 }):OnChanged(function(p961)
@@ -9101,9 +9021,9 @@ spawn(function()
         end
     end
 end)
-vu3.Fruit:AddSection("\239\191\189\225\187\139nh V\225\187\139")
+vu3.Fruit:AddSection("Settesp")
 vu3.Fruit:AddToggle("ToggleEspPlayer", {
-    ["Title"] = "Người Chơi",
+    ["Title"] = "ESP Players",
     ["Description"] = "",
     ["Default"] = false
 }):OnChanged(function(p966)
@@ -9112,7 +9032,7 @@ vu3.Fruit:AddToggle("ToggleEspPlayer", {
 end)
 vu4.ToggleEspPlayer:SetValue(false)
 vu3.Fruit:AddToggle("ToggleEspFruit", {
-    ["Title"] = "Trái",
+    ["Title"] = "ESP Fruits",
     ["Description"] = "",
     ["Default"] = false
 }):OnChanged(function(p967)
@@ -9124,7 +9044,7 @@ vu3.Fruit:AddToggle("ToggleEspFruit", {
 end)
 vu4.ToggleEspFruit:SetValue(false)
 vu3.Fruit:AddToggle("ToggleEspIsland", {
-    ["Title"] = "Đảo",
+    ["Title"] = "ESP Island",
     ["Description"] = "",
     ["Default"] = false
 }):OnChanged(function(p968)
@@ -9136,7 +9056,7 @@ vu3.Fruit:AddToggle("ToggleEspIsland", {
 end)
 vu4.ToggleEspIsland:SetValue(false)
 vu3.Fruit:AddToggle("ToggleEspFlower", {
-    ["Title"] = "Hoa",
+    ["Title"] = "ESP Flower",
     ["Description"] = "",
     ["Default"] = false
 }):OnChanged(function(p969)
@@ -9164,7 +9084,7 @@ spawn(function()
     end
 end)
 vu3.Fruit:AddToggle("ToggleEspRealFruit", {
-    ["Title"] = "Trái Dủa Kh\225\187\155m Táo",
+    ["Title"] = "ESP Real Fruits",
     ["Description"] = "",
     ["Default"] = false
 }):OnChanged(function(p970)
@@ -9281,7 +9201,7 @@ function UpdateRealFruitEsp()
     end
 end
 vu3.Fruit:AddToggle("ToggleIslandMirageEsp", {
-    ["Title"] = "Đảo Bí \225\186\168n",
+    ["Title"] = "ESP Mirage",
     ["Description"] = "",
     ["Default"] = false
 }):OnChanged(function(p989)
@@ -9339,7 +9259,7 @@ function UpdateIslandMirageEsp()
     end
 end
 local v999 = vu3.Raid:AddDropdown("DropdownRaid", {
-    ["Title"] = "Chọn Chip",
+    ["Title"] = "Select Chip",
     ["Description"] = "",
     ["Values"] = {
         "Flame",
@@ -9363,7 +9283,7 @@ v999:OnChanged(function(p1000)
     SelectChip = p1000
 end)
 vu3.Raid:AddToggle("ToggleBuy", {
-    ["Title"] = "Mua Chip",
+    ["Title"] = "Buy Chip",
     ["Description"] = "",
     ["Default"] = false
 }):OnChanged(function(p1001)
@@ -9385,7 +9305,7 @@ spawn(function()
     end
 end)
 vu3.Raid:AddToggle("ToggleStart", {
-    ["Title"] = "Bắt Đầu Raid",
+    ["Title"] = "Start Raid",
     ["Description"] = "",
     ["Default"] = false
 }):OnChanged(function(p1003)
@@ -9415,7 +9335,7 @@ spawn(function()
     end
 end)
 vu3.Raid:AddToggle("ToggleNextIsland", {
-    ["Title"] = "Đánh Quái Raid+Bay Đến Đảo",
+    ["Title"] = "Auto Next Island & Clear Raid",
     ["Description"] = "",
     ["Default"] = false
 }):OnChanged(function(p1004)
@@ -9472,7 +9392,7 @@ spawn(function()
     end
 end)
 vu3.Raid:AddToggle("ToggleAwake", {
-    ["Title"] = "Thức Tỉnh",
+    ["Title"] = "Auto Awaken Fruit",
     ["Description"] = "",
     ["Default"] = false
 }):OnChanged(function(p1009)
@@ -9489,7 +9409,7 @@ spawn(function()
     end
 end)
 vu3.Raid:AddToggle("ToggleGetFruit", {
-    ["Title"] = "Lấy Trái Dư\225\187\155i 1 Triệu",
+    ["Title"] = "Get Fruit From Backpack",
     ["Description"] = "",
     ["Default"] = false
 }):OnChanged(function(p1010)
@@ -9573,7 +9493,7 @@ spawn(function()
 end)
 if Sea2 then
     vu3.Raid:AddButton({
-        ["Title"] = "Bay Đến Chợ Tắp Kích",
+        ["Title"] = "Teleport to Raid",
         ["Description"] = "",
         ["Callback"] = function()
             Tween2(CFrame.new(- 6438.73535, 250.645355, - 4501.50684))
@@ -9581,7 +9501,7 @@ if Sea2 then
     })
 elseif Sea3 then
     vu3.Raid:AddButton({
-        ["Title"] = "Bay Đến Chợ Tắp Kích",
+        ["Title"] = "Teleport To Raid",
         ["Description"] = "",
         ["Callback"] = function()
             game:GetService("ReplicatedStorage").Remotes.CommF_:InvokeServer("requestEntrance", Vector3.new(- 5075.50927734375, 314.5155029296875, - 3150.0224609375))
@@ -9589,9 +9509,9 @@ elseif Sea3 then
         end
     })
 end
-vu3.Raid:AddSection("Tắp Kích Law")
+vu3.Raid:AddSection("RaidLaw")
 vu3.Raid:AddToggle("ToggleLaw", {
-    ["Title"] = "Mua Chip Và Đánh Law",
+    ["Title"] = "Buy Chip Law",
     ["Description"] = "",
     ["Default"] = false
 }):OnChanged(function(p1011)
@@ -9646,14 +9566,14 @@ spawn(function()
     end)
 end)
 vu3.Race:AddButton({
-    ["Title"] = "Đền Thời Gian",
+    ["Title"] = "Temple of Time",
     ["Description"] = "",
     ["Callback"] = function()
         game:GetService("ReplicatedStorage").Remotes.CommF_:InvokeServer("requestEntrance", Vector3.new(28286.35546875, 14895.3017578125, 102.62469482421875))
     end
 })
 vu3.Race:AddButton({
-    ["Title"] = "Cần Gạt",
+    ["Title"] = "Pull Lever",
     ["Description"] = "",
     ["Callback"] = function()
         game:GetService("ReplicatedStorage").Remotes.CommF_:InvokeServer("requestEntrance", Vector3.new(28286.35546875, 14895.3017578125, 102.62469482421875))
@@ -9661,16 +9581,16 @@ vu3.Race:AddButton({
     end
 })
 vu3.Race:AddButton({
-    ["Title"] = "Chợ Mua Gear",
+    ["Title"] = "TP Gear Clock",
     ["Description"] = "",
     ["Callback"] = function()
         game:GetService("ReplicatedStorage").Remotes.CommF_:InvokeServer("requestEntrance", Vector3.new(28286.35546875, 14895.3017578125, 102.62469482421875))
         Tween2(CFrame.new(28981.552734375, 14888.4267578125, - 120.245849609375))
     end
 })
-vu3.Race:AddSection("Tộc")
+vu3.Race:AddSection("Race")
 vu3.Race:AddButton({
-    ["Title"] = "Cửa Tộc",
+    ["Title"] = "Race Door",
     ["Description"] = "",
     ["Callback"] = function()
         game:GetService("ReplicatedStorage").Remotes.CommF_:InvokeServer("requestEntrance", Vector3.new(28286.35546875, 14895.3017578125, 102.62469482421875))
@@ -9700,7 +9620,7 @@ vu3.Race:AddButton({
     end
 })
 vu3.Race:AddToggle("ToggleHumanandghoul", {
-    ["Title"] = "Hoàn Thành \225\186\162i [Human/Ghoul]",
+    ["Title"] = "Auto Complete Trial [Human/Ghoul]",
     ["Description"] = "",
     ["Default"] = false
 }):OnChanged(function(p1016)
@@ -9708,7 +9628,7 @@ vu3.Race:AddToggle("ToggleHumanandghoul", {
 end)
 vu4.ToggleHumanandghoul:SetValue(false)
 vu3.Race:AddToggle("ToggleAutotrial", {
-    ["Title"] = "Hoàn Thành \225\186\162i",
+    ["Title"] = "Auto Complete Trial",
     ["Description"] = "",
     ["Default"] = false
 }):OnChanged(function(p1017)
@@ -9891,7 +9811,7 @@ spawn(function()
     end)
 end)
 vu3.Race:AddToggle("ToggleKillTrial", {
-    ["Title"] = "Đánh Người Chơi Trong Trial",
+    ["Title"] = "Kill Players (Trial)",
     ["Description"] = "",
     ["Default"] = false
 }):OnChanged(function(p1054)
@@ -9925,9 +9845,9 @@ spawn(function()
         end)
     end
 end)
-vu3.Race:AddSection("Huấn Luyận")
+vu3.Race:AddSection("RaceQuest")
 local v1059 = vu3.Race:AddToggle("ToggleFarmRace", {
-    ["Title"] = "Cày Luyện Tộc",
+    ["Title"] = "Auto Race Quest",
     ["Description"] = "",
     ["Default"] = false
 })
@@ -9962,7 +9882,7 @@ spawn(function()
     end
 end)
 vu3.Race:AddToggle("ToggleUpgrade", {
-    ["Title"] = "Mua Gear",
+    ["Title"] = "Upgrade Gear",
     ["Description"] = "",
     ["Default"] = false
 }):OnChanged(function(p1062)
@@ -9972,7 +9892,7 @@ vu3.Race:AddToggle("ToggleUpgrade", {
     end
 end)
 vu4.ToggleUpgrade:SetValue(false)
-vu3.Shop:AddSection("Khả Năng")
+vu3.Shop:AddSection("Ability")
 vu3.Shop:AddButton({
     ["Title"] = "Geppo",
     ["Description"] = "",
@@ -10122,7 +10042,7 @@ vu3.Shop:AddButton({
         game:GetService("ReplicatedStorage").Remotes.CommF_:InvokeServer("BlackbeardReward", "Slingshot", "2")
     end
 })
-vu3.Shop:AddSection("Ph\225\187\165 Kiận")
+vu3.Shop:AddSection("Accessories")
 vu3.Shop:AddButton({
     ["Title"] = "Black Cape",
     ["Description"] = "",
@@ -10144,7 +10064,7 @@ vu3.Shop:AddButton({
         game:GetService("ReplicatedStorage").Remotes.CommF_:InvokeServer("BuyItem", "Tomoe Ring")
     end
 })
-vu3.Shop:AddSection("Võ")
+vu3.Shop:AddSection("Fightstyles")
 vu3.Shop:AddButton({
     ["Title"] = "Black Leg",
     ["Description"] = "",
@@ -10224,9 +10144,9 @@ vu3.Shop:AddButton({
         game:GetService("ReplicatedStorage").Remotes.CommF_:InvokeServer("BuySanguineArt")
     end
 })
-vu3.Shop:AddSection("Khác")
+vu3.Shop:AddSection("Miscellaneous")
 vu3.Shop:AddButton({
-    ["Title"] = "\239\191\189\225\187\149i Chỉ Sổ",
+    ["Title"] = "Refund Stats",
     ["Description"] = "",
     ["Callback"] = function()
         game:GetService("ReplicatedStorage").Remotes.CommF_:InvokeServer("BlackbeardReward", "Refund", "1")
@@ -10234,7 +10154,7 @@ vu3.Shop:AddButton({
     end
 })
 vu3.Shop:AddButton({
-    ["Title"] = "\239\191\189\225\187\149i Tộc",
+    ["Title"] = "Reroll Race",
     ["Description"] = "",
     ["Callback"] = function()
         game:GetService("ReplicatedStorage").Remotes.CommF_:InvokeServer("BlackbeardReward", "Reroll", "1")
@@ -10242,7 +10162,7 @@ vu3.Shop:AddButton({
     end
 })
 vu3.Shop:AddButton({
-    ["Title"] = "\239\191\189\225\187\149i Tộc Ghoul",
+    ["Title"] = "Buy Ghoul Race",
     ["Description"] = "",
     ["Callback"] = function()
         game:GetService("ReplicatedStorage").Remotes.CommF_:InvokeServer(unpack({
@@ -10253,7 +10173,7 @@ vu3.Shop:AddButton({
     end
 })
 vu3.Shop:AddButton({
-    ["Title"] = "\239\191\189\225\187\149i Tộc Cyborg",
+    ["Title"] = "Buy Cyborg Race",
     ["Description"] = "",
     ["Callback"] = function()
         game:GetService("ReplicatedStorage").Remotes.CommF_:InvokeServer(unpack({
@@ -10263,8 +10183,8 @@ vu3.Shop:AddButton({
     end
 })
 vu3.Shop:AddButton({
-    ["Title"] = "Đ\225\187\149i Tộc Draco",
-    ["Description"] = "Chỉ \225\187\158 Biển 3",
+    ["Title"] = "Buy Draco Race",
+    ["Description"] = "",
     ["Callback"] = function()
         game:GetService("ReplicatedStorage").Remotes.CommF_:InvokeServer("requestEntrance", Vector3.new(5661.5322265625, 1013.0907592773438, - 334.9649963378906))
         Tween2(CFrame.new(5814.42724609375, 1208.3267822265625, 884.5785522460938))
@@ -10287,14 +10207,14 @@ vu3.Shop:AddButton({
     end
 })
 vu3.Misc:AddButton({
-    ["Title"] = "Tham Gia Máy Ch\225\187\167 Lại",
+    ["Title"] = "Rejoin Server",
     ["Description"] = "",
     ["Callback"] = function()
         game:GetService("TeleportService"):Teleport(game.PlaceId, game:GetService("Players").LocalPlayer)
     end
 })
 vu3.Misc:AddButton({
-    ["Title"] = "Đ\225\187\149i Máy Ch\225\187\167",
+    ["Title"] = "Server Hop",
     ["Description"] = "",
     ["Callback"] = function()
         Hop()
@@ -10375,22 +10295,22 @@ function Hop()
     end
     vu916()
 end
-vu3.Misc:AddSection("Đội")
+vu3.Misc:AddSection("TeamSelect")
 vu3.Misc:AddButton({
-    ["Title"] = "Hải Tặc",
+    ["Title"] = "Join Pirates",
     ["Description"] = "",
     ["Callback"] = function()
         game:GetService("ReplicatedStorage").Remotes.CommF_:InvokeServer("SetTeam", "Pirates")
     end
 })
 vu3.Misc:AddButton({
-    ["Title"] = "Hải Quân",
+    ["Title"] = "Join Marines",
     ["Description"] = "",
     ["Callback"] = function()
         game:GetService("ReplicatedStorage").Remotes.CommF_:InvokeServer("SetTeam", "Marines")
     end
 })
-vu3.Misc:AddSection("Kinh Nghiậm")
+vu3.Misc:AddSection("code")
 local vu1083 = {
     "KITT_RESET",
     "Sub2UncleKizaru",
@@ -10437,7 +10357,7 @@ local vu1083 = {
     "SECRET_ADMIN"
 }
 vu3.Misc:AddButton({
-    ["Title"] = "Nhắp Hết",
+    ["Title"] = "Redeem All Codes",
     ["Description"] = "",
     ["Callback"] = function()
 		-- upvalues: (ref) vu1083
@@ -10455,9 +10375,9 @@ vu3.Misc:AddButton({
 function RedeemCode(p1088)
     game:GetService("ReplicatedStorage").Remotes.Redeem:InvokeServer(p1088)
 end
-vu3.Misc:AddSection("Danh Hiậu")
+vu3.Misc:AddSection("TitAwake")
 vu3.Misc:AddButton({
-    ["Title"] = "Danh Hiệu",
+    ["Title"] = "Titles",
     ["Description"] = "",
     ["Callback"] = function()
         game:GetService("ReplicatedStorage").Remotes.CommF_:InvokeServer(unpack({
@@ -10466,17 +10386,17 @@ vu3.Misc:AddButton({
         game.Players.localPlayer.PlayerGui.Main.Titles.Visible = true
     end
 })
-vu3.Misc:AddSection("Thủc Tỉnh")
+vu3.Misc:AddSection("Awakening")
 vu3.Misc:AddButton({
-    ["Title"] = "Thức Tỉnh",
+    ["Title"] = "Awakening Fruit",
     ["Description"] = "",
     ["Callback"] = function()
         game:GetService("Players").LocalPlayer.PlayerGui.Main.AwakeningToggler.Visible = true
     end
 })
-vu3.Misc:AddSection("Khác")
+vu3.Misc:AddSection("Re")
 vu3.Misc:AddToggle("ToggleRejoin", {
-    ["Title"] = "Tham Gia Máy Ch\225\187\167 Lại",
+    ["Title"] = "Auto Rejoin",
     ["Description"] = "",
     ["Default"] = true
 }):OnChanged(function(p1089)
@@ -10494,7 +10414,7 @@ spawn(function()
         end
     end
 end)
-vu3.Misc:AddSection("Sương")
+vu3.Misc:AddSection("Remove")
 local function vu1092()
     local v1091 = game:GetService("Lighting")
     if v1091:FindFirstChild("BaseAtmosphere") then
@@ -10515,7 +10435,7 @@ local function vu1092()
     v1091.FogEnd = 100000
 end
 vu3.Misc:AddButton({
-    ["Title"] = "Xóa Sương Mù",
+    ["Title"] = "Remove Fog",
     ["Description"] = "",
     ["Callback"] = function()
 		-- upvalues: (ref) vu1092
@@ -10523,7 +10443,7 @@ vu3.Misc:AddButton({
     end
 })
 vu3.Misc:AddToggle("ToggleAntiBand", {
-    ["Title"] = "Chống Band",
+    ["Title"] = "Anti ban",
     ["Description"] = "",
     ["Default"] = true
 }):OnChanged(function(p1093)
@@ -10554,14 +10474,14 @@ spawn(function()
 end)
 vu3.Sea:AddSection("Leviathan")
 vu3.Sea:AddButton({
-    ["Title"] = "Mua Chip Leviathan",
+    ["Title"] = "Pay Flagment Leviathan",
     ["Description"] = "",
     ["Callback"] = function()
         game:GetService("ReplicatedStorage").Remotes.CommF_:InvokeServer("InfoLeviathan", "2")
     end
 })
 local v1099 = vu3.Sea:AddToggle("ToggleTPFrozenDimension", {
-    ["Title"] = "Bay Đến Đảo Leviathan",
+    ["Title"] = "Teleport to Leviathan Island",
     ["Description"] = "",
     ["Default"] = false
 })
@@ -10583,7 +10503,7 @@ spawn(function()
 end)
 if Sea3 then
     local vu1102 = vu3.Sea:AddParagraph({
-        ["Title"] = "Trạng Thái Chip Leviathan",
+        ["Title"] = "Status Pay Leviathan",
         ["Content"] = ""
     })
     spawn(function()
@@ -10597,7 +10517,7 @@ if Sea3 then
                 elseif v1103 == 0 then
                     vu1102:SetDesc("I Don\'t Know")
                 else
-                    vu1102:SetDesc("Mua: " .. tostring(v1103))
+                    vu1102:SetDesc("Buy: " .. tostring(v1103))
                 end
             end
         end)
@@ -10605,7 +10525,7 @@ if Sea3 then
 end
 vu3.Sea:AddSection("Draco")
 vu3.Sea:AddToggle("ToggleBlazeEmber", {
-    ["Title"] = "Làm Lứa Đố",
+    ["Title"] = "Auto Blaze Ember",
     ["Description"] = "",
     ["Default"] = false
 }):OnChanged(function(p1104)
@@ -10621,7 +10541,7 @@ spawn(function()
     end
 end)
 vu3.Sea:AddToggle("ToggleBlazeEmberFarm", {
-    ["Title"] = "Đánh Hydra Enforcer + Venomous Assailant",
+    ["Title"] = "Farm Hydra & Venomous",
     ["Description"] = "",
     ["Default"] = false
 }):OnChanged(function(p1105)
@@ -10666,8 +10586,8 @@ spawn(function()
     end
 end)
 vu3.Sea:AddToggle("ToggleReceiveQuest", {
-    ["Title"] = "Nhắn Nhiậm V\225\187\165 Lứa Đố",
-    ["Description"] = "Bắt Lên 1 Lần Là Nhắn 1 Nhắn Nửa Thì Tằt Bắt Lại",
+    ["Title"] = "Auto Get Draco Quest",
+    ["Description"] = "",
     ["Default"] = false
 }):OnChanged(function(p1111)
     _G.AutoReceiveQuest = p1111
@@ -10693,7 +10613,7 @@ vu3.Sea:AddToggle("ToggleReceiveQuest", {
     end
 end)
 local vu1112 = vu3.Sea:AddParagraph({
-    ["Title"] = "Trạng Thái Nhiệm V\225\187\165 Lứa Đố",
+    ["Title"] = "Draco Quest Status",
     ["Content"] = ""
 })
 spawn(function()
@@ -10727,7 +10647,7 @@ spawn(function()
     end)
 end)
 vu3.Sea:AddToggle("ToggleHydraTree", {
-    ["Title"] = "Phá Cây \225\187\158 Đảo Hydra",
+    ["Title"] = "Auto Destroy Hydra Trees",
     ["Description"] = "",
     ["Default"] = false
 }):OnChanged(function(p1118)
@@ -10807,7 +10727,7 @@ spawn(function()
     end
 end)
 vu3.Sea:AddButton({
-    ["Title"] = "Bay Đến Khu Vữc Dragon Dojo",
+    ["Title"] = "Teleport to Dragon Dojo",
     ["Description"] = "",
     ["Callback"] = function()
         game:GetService("ReplicatedStorage").Remotes.CommF_:InvokeServer("requestEntrance", Vector3.new(5661.5322265625, 1013.0907592773438, - 334.9649963378906))
@@ -10815,8 +10735,8 @@ vu3.Sea:AddButton({
     end
 })
 vu3.Sea:AddButton({
-    ["Title"] = "Chế Tạo Volcanic Magnet",
-    ["Description"] = "Cần 15 Lứa Đố+10 Sằt",
+    ["Title"] = "Craft Volcanic Magnet",
+    ["Description"] = "",
     ["Callback"] = function()
         game:GetService("ReplicatedStorage").Remotes.CommF_:InvokeServer(unpack({
             "CraftItem",
@@ -10826,8 +10746,8 @@ vu3.Sea:AddButton({
     end
 })
 vu3.Sea:AddButton({
-    ["Title"] = "Chế Tạo Dino Hood",
-    ["Description"] = "Cần 25 Xương Kh\225\187\167ng Long + 10 Sừng Tê Giác",
+    ["Title"] = "Craft Dino Hood",
+    ["Description"] = "",
     ["Callback"] = function()
         game:GetService("ReplicatedStorage").Remotes.CommF_:InvokeServer(unpack({
             "CraftItem",
@@ -10837,8 +10757,8 @@ vu3.Sea:AddButton({
     end
 })
 vu3.Sea:AddButton({
-    ["Title"] = "Chế Tạo T-Rex Skull",
-    ["Description"] = "Cần 8 Xương Kh\225\187\167ng Long + 5 Vảy Rỗng",
+    ["Title"] = "Craft T-Rex Skull",
+    ["Description"] = "",
     ["Callback"] = function()
         game:GetService("ReplicatedStorage").Remotes.CommF_:InvokeServer(unpack({
             "CraftItem",
@@ -10848,7 +10768,7 @@ vu3.Sea:AddButton({
     end
 })
 vu3.Sea:AddToggle("ToggleCollectFireFlowers", {
-    ["Title"] = "Làm Hoa Đố",
+    ["Title"] = "Auto Fire Flowers",
     ["Description"] = "",
     ["Default"] = false
 }):OnChanged(function(p1140)
@@ -10880,7 +10800,7 @@ spawn(function()
     end
 end)
 vu3.Sea:AddToggle("ToggleWhiteBelt", {
-    ["Title"] = "Cày Đai Trằng",
+    ["Title"] = "Auto Draco Belt",
     ["Description"] = "",
     ["Default"] = false
 }):OnChanged(function(p1147)
@@ -10906,11 +10826,11 @@ vu3.Sea:AddToggle("ToggleWhiteBelt", {
     end
 end)
 vu3.Sea:AddParagraph({
-    ["Title"] = "Hoàn Thành \225\186\162i Draco V4 (S\225\187\155m Ra)",
+    ["Title"] = "Draco V4 Status",
     ["Content"] = ""
 })
 vu3.Sea:AddToggle("ToggleTrialTeleport", {
-    ["Title"] = "Bay Đến Cứa Trial Tộc Draco",
+    ["Title"] = "TP to Draco Trial Entrance",
     ["Description"] = "",
     ["Default"] = false
 }):OnChanged(function(p1148)
@@ -10929,9 +10849,9 @@ spawn(function()
         end
     end
 end)
-vu3.Sea:AddSection("Đảo Dung Nham")
+vu3.Sea:AddSection("PrehistoricIsland")
 local vu1150 = vu3.Sea:AddParagraph({
-    ["Title"] = "Trạng Thái Đảo Dung Nham",
+    ["Title"] = "Prehistoric Island Status",
     ["Content"] = ""
 })
 spawn(function()
@@ -10940,15 +10860,15 @@ spawn(function()
 		-- upvalues: (ref) vu1150
         while wait() do
             if game:GetService("Workspace").Map:FindFirstChild("PrehistoricIsland") then
-                vu1150:SetDesc("Đảo Dung Nham: \226\156\133\239\184\143")
+                vu1150:SetDesc("Prehistoric Island Status: Found")
             else
-                vu1150:SetDesc("Đảo Dung Nham: \226\157\140\239\184\143")
+                vu1150:SetDesc("Prehistoric Island Status: Not Found")
             end
         end
     end)
 end)
 vu3.Sea:AddToggle("ToggleTPVolcano", {
-    ["Title"] = "Bay Đến Đảo Dung Nham",
+    ["Title"] = "TP to Prehistoric Island",
     ["Description"] = "",
     ["Default"] = false
 }):OnChanged(function(p1151)
@@ -10979,28 +10899,28 @@ spawn(function()
     end
 end)
 vu3.Sea:AddToggle("ToggleDefendVolcano", {
-    ["Title"] = "Ph\195\178ng Th\225\187\167",
+    ["Title"] = "Auto Defend Island",
     ["Description"] = "",
     ["Default"] = false
 }):OnChanged(function(p1155)
     _G.AutoDefendVolcano = p1155
 end)
 vu3.Sea:AddToggle("ToggleMelee", {
-    ["Title"] = "Dùng Melee",
+    ["Title"] = "Use Melee",
     ["Description"] = "",
     ["Default"] = false
 }):OnChanged(function(p1156)
     _G.UseMelee = p1156
 end)
 vu3.Sea:AddToggle("ToggleSword", {
-    ["Title"] = "Dùng Sword",
+    ["Title"] = "Use Sword",
     ["Description"] = "",
     ["Default"] = false
 }):OnChanged(function(p1157)
     _G.UseSword = p1157
 end)
 vu3.Sea:AddToggle("ToggleGun", {
-    ["Title"] = "Dùng Gun",
+    ["Title"] = "Use Gun",
     ["Description"] = "",
     ["Default"] = false
 }):OnChanged(function(p1158)
@@ -11146,7 +11066,7 @@ spawn(function()
     end
 end)
 vu3.Sea:AddToggle("ToggleKillAura", {
-    ["Title"] = "Đánh Golems Aura",
+    ["title"] = "hit Golems Aura",
     ["Description"] = "",
     ["Default"] = false
 }):OnChanged(function(p1200)
@@ -11178,7 +11098,7 @@ spawn(function()
     end
 end)
 vu3.Sea:AddToggle("ToggleCollectBone", {
-    ["Title"] = "Làm Xương",
+    ["Title"] = "Auto Collect Bones",
     ["Description"] = "",
     ["Default"] = false
 }):OnChanged(function(p1205)
@@ -11202,7 +11122,7 @@ spawn(function()
     end
 end)
 vu3.Sea:AddToggle("ToggleCollectEgg", {
-    ["Title"] = "Làm Trứng",
+    ["Title"] = "Auto Collect Egg",
     ["Description"] = "",
     ["Default"] = false
 }):OnChanged(function(p1210)
@@ -11227,7 +11147,7 @@ spawn(function()
     end
 end)
 -- ===============================================================
--- NÚT TOGGLE MENU - FIX HOÀN TOÀN MỚI
+-- Toggle
 -- ===============================================================
 
 local ToggleButton = Instance.new("ScreenGui")
@@ -11242,184 +11162,199 @@ local MenuVisible = true
 local MainContainer = nil
 
 -- Setup GUI
-ToggleButton.Name = "BananaCatToggle"
--- ===============================================================
--- TOGGLE BUTTON - CLEAN CIRCULAR DESIGN
--- ===============================================================
-
-task.wait(2)
-
-local TweenService = game:GetService("TweenService")
-local VirtualInputManager = game:GetService("VirtualInputManager")
-local CoreGui = game:GetService("CoreGui")
-
--- Create ScreenGui
-local ToggleGui = Instance.new("ScreenGui")
-ToggleGui.Name = "BananaCatToggle"
-ToggleGui.Parent = CoreGui
-ToggleGui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
-ToggleGui.ResetOnSpawn = false
-ToggleGui.DisplayOrder = 999999
-
--- Create Button (NO BLACK BORDER)
-local ToggleButton = Instance.new("ImageButton")
-ToggleButton.Name = "ToggleButton"
-ToggleButton.Parent = ToggleGui
-ToggleButton.AnchorPoint = Vector2.new(0, 0.5)
-ToggleButton.BackgroundTransparency = 1
-ToggleButton.BorderSizePixel = 0
-ToggleButton.Position = UDim2.new(0.01, 0, 0.5, 0)
-ToggleButton.Size = UDim2.new(0, 45, 0, 45)
-ToggleButton.Image = "rbxassetid://123613996022560"
-ToggleButton.ScaleType = Enum.ScaleType.Fit
-ToggleButton.Active = true
-ToggleButton.Draggable = true
-ToggleButton.AutoButtonColor = false
-
--- Rounded
-local Corner = Instance.new("UICorner")
-Corner.CornerRadius = UDim.new(1, 0)
-Corner.Parent = ToggleButton
-
--- Stroke
-local Stroke = Instance.new("UIStroke")
-Stroke.Parent = ToggleButton
-Stroke.Color = Color3.fromRGB(255, 170, 0)
-Stroke.Thickness = 2
-Stroke.Transparency = 0.3
-Stroke.ApplyStrokeMode = Enum.ApplyStrokeMode.Border
-
--- Shadow
-local Shadow = Instance.new("ImageLabel")
-Shadow.Name = "Shadow"
-Shadow.Parent = ToggleButton
-Shadow.BackgroundTransparency = 1
-Shadow.Position = UDim2.new(0.5, 0, 0.5, 0)
-Shadow.Size = UDim2.new(1.4, 0, 1.4, 0)
-Shadow.AnchorPoint = Vector2.new(0.5, 0.5)
-Shadow.Image = "rbxassetid://1316045217"
-Shadow.ImageColor3 = Color3.fromRGB(0, 0, 0)
-Shadow.ImageTransparency = 0.6
-Shadow.ZIndex = -1
-
--- Particles
-local Particles = Instance.new("ParticleEmitter")
-Particles.Parent = ToggleButton
-Particles.Enabled = false
-Particles.Lifetime = NumberRange.new(0.3, 0.6)
-Particles.Rate = 30
-Particles.Speed = NumberRange.new(3, 6)
-Particles.SpreadAngle = Vector2.new(360, 360)
-Particles.Transparency = NumberSequence.new({
-    NumberSequenceKeypoint.new(0, 0),
-    NumberSequenceKeypoint.new(1, 1)
-})
-Particles.Size = NumberSequence.new({
-    NumberSequenceKeypoint.new(0, 0.3),
-    NumberSequenceKeypoint.new(1, 0)
-})
-Particles.Color = ColorSequence.new(Color3.fromRGB(255, 170, 0))
-Particles.LightEmission = 1
-
--- Anti-spam
-local IsAnimating = false
-local LastClick = 0
-
--- Simulate END key
-local function PressEnd()
-    local now = tick()
-    if now - LastClick < 0.5 then return end
-    LastClick = now
-    IsAnimating = true
-    
-    -- Animation (NO ROTATION)
-    Particles.Enabled = true
-    
-    local grow = TweenService:Create(ToggleButton,
-        TweenInfo.new(0.15, Enum.EasingStyle.Quad, Enum.EasingDirection.Out),
-        {Size = UDim2.new(0, 52, 0, 52)}
-    )
-    
-    local glow = TweenService:Create(Stroke,
-        TweenInfo.new(0.15, Enum.EasingStyle.Quad, Enum.EasingDirection.Out),
-        {Thickness = 3, Transparency = 0}
-    )
-    
-    grow:Play()
-    glow:Play()
-    
-    grow.Completed:Connect(function()
-        local shrink = TweenService:Create(ToggleButton,
-            TweenInfo.new(0.15, Enum.EasingStyle.Quad, Enum.EasingDirection.In),
-            {Size = UDim2.new(0, 45, 0, 45)}
-        )
-        
-        local dim = TweenService:Create(Stroke,
-            TweenInfo.new(0.15, Enum.EasingStyle.Quad, Enum.EasingDirection.In),
-            {Thickness = 2, Transparency = 0.3}
-        )
-        
-        shrink:Play()
-        dim:Play()
-        
-        shrink.Completed:Connect(function()
-            Particles.Enabled = false
-            IsAnimating = false
-        end)
-    end)
-    
-    -- Send END key
-    pcall(function()
-        VirtualInputManager:SendKeyEvent(true, Enum.KeyCode.End, false, game)
-        task.wait(0.05)
-        VirtualInputManager:SendKeyEvent(false, Enum.KeyCode.End, false, game)
-    end)
+ToggleButton.Name = "ReaperToggle"
+--=========================
+-- TOGGLE BUTTON + PURE BLUR
+--=========================
+if game.CoreGui:FindFirstChild("ToggleUI") then
+    game.CoreGui.ToggleUI:Destroy()
 end
 
--- Click event
-ToggleButton.MouseButton1Click:Connect(PressEnd)
-
--- Hover effects
-ToggleButton.MouseEnter:Connect(function()
-    if not IsAnimating then
-        TweenService:Create(ToggleButton, TweenInfo.new(0.2), {
-            Size = UDim2.new(0, 50, 0, 50)
-        }):Play()
-        
-        TweenService:Create(Stroke, TweenInfo.new(0.2), {
-            Thickness = 2.5,
-            Transparency = 0
-        }):Play()
-        
-        TweenService:Create(Shadow, TweenInfo.new(0.2), {
-            ImageTransparency = 0.4
-        }):Play()
-    end
-end)
-
-ToggleButton.MouseLeave:Connect(function()
-    if not IsAnimating then
-        TweenService:Create(ToggleButton, TweenInfo.new(0.2), {
-            Size = UDim2.new(0, 45, 0, 45)
-        }):Play()
-        
-        TweenService:Create(Stroke, TweenInfo.new(0.2), {
-            Thickness = 2,
-            Transparency = 0.3
-        }):Play()
-        
-        TweenService:Create(Shadow, TweenInfo.new(0.2), {
-            ImageTransparency = 0.6
-        }):Play()
-    end
-end)
-
 pcall(function()
-    game:GetService("StarterGui"):SetCore("SendNotification", {
-        Title = "Toggle Button Ready";
-        Text = "Click button to toggle menu";
-        Duration = 4;
-    })
+    game:GetService("Lighting"):FindFirstChild("MenuBlur"):Destroy()
 end)
 
-print("Toggle button created successfully")
+--=========================
+-- SERVICES
+--=========================
+local UIS = game:GetService("UserInputService")
+local TweenService = game:GetService("TweenService")
+local Lighting = game:GetService("Lighting")
+
+--=========================
+-- BLUR
+--=========================
+local Blur = Instance.new("BlurEffect")
+Blur.Name = "MenuBlur"
+Blur.Size = 40
+Blur.Parent = Lighting
+
+--=========================
+-- GUI
+--=========================
+local gui = Instance.new("ScreenGui")
+gui.Name = "ToggleUI"
+gui.ResetOnSpawn = false
+gui.IgnoreGuiInset = true
+gui.DisplayOrder = 999999
+gui.Parent = game.CoreGui
+
+--=========================
+-- BORDER
+--=========================
+local border = Instance.new("Frame")
+border.Parent = gui
+border.Size = UDim2.new(0,0,0,0)
+border.BackgroundColor3 = Color3.fromRGB(0,0,0)
+border.ZIndex = 1
+border.AnchorPoint = Vector2.new(0,0)
+
+local borderCorner = Instance.new("UICorner")
+borderCorner.CornerRadius = UDim.new(0,14)
+borderCorner.Parent = border
+
+--=========================
+-- BUTTON
+--=========================
+local button = Instance.new("ImageButton")
+button.Parent = gui
+button.Size = UDim2.new(0,60,0,60)
+button.Position = UDim2.new(0,60,0.2,0)
+button.AnchorPoint = Vector2.new(0,0)
+
+button.BackgroundTransparency = 1
+button.ZIndex = 999999
+button.AutoButtonColor = false
+
+local corner = Instance.new("UICorner")
+corner.CornerRadius = UDim.new(0,12)
+corner.Parent = button
+
+--=========================
+-- IMAGE
+--=========================
+local imgOn = "rbxassetid://86279908104891"
+local imgOff = "rbxassetid://86279908104891"
+
+button.Image = imgOn
+button.ScaleType = Enum.ScaleType.Fit
+
+--=========================
+-- AUTO ALIGN
+--=========================
+local function UpdateBorder()
+
+    local offset = (border.Size.X.Offset - button.Size.X.Offset) / 2
+
+    border.Position = UDim2.new(
+        button.Position.X.Scale,
+        button.Position.X.Offset - offset,
+        button.Position.Y.Scale,
+        button.Position.Y.Offset - offset
+    )
+end
+
+UpdateBorder()
+
+--=========================
+-- DRAG SYSTEM
+--=========================
+local dragging = false
+local dragStart, startPos
+
+button.InputBegan:Connect(function(input)
+
+    if input.UserInputType == Enum.UserInputType.MouseButton1
+    or input.UserInputType == Enum.UserInputType.Touch then
+
+        dragging = true
+        dragStart = input.Position
+        startPos = button.Position
+    end
+end)
+
+UIS.InputChanged:Connect(function(input)
+
+    if dragging then
+
+        local delta = input.Position - dragStart
+
+        button.Position = UDim2.new(
+            startPos.X.Scale,
+            startPos.X.Offset + delta.X,
+            startPos.Y.Scale,
+            startPos.Y.Offset + delta.Y
+        )
+
+        UpdateBorder()
+    end
+end)
+
+UIS.InputEnded:Connect(function(input)
+
+    if input.UserInputType == Enum.UserInputType.MouseButton1
+    or input.UserInputType == Enum.UserInputType.Touch then
+
+        dragging = false
+    end
+end)
+
+--=========================
+-- BLUR FUNCTIONS
+--=========================
+local function OpenBlur()
+
+    TweenService:Create(
+        Blur,
+        TweenInfo.new(
+            0.3,
+            Enum.EasingStyle.Quad,
+            Enum.EasingDirection.Out
+        ),
+        {
+            Size = 40
+        }
+    ):Play()
+end
+
+local function CloseBlur()
+
+    TweenService:Create(
+        Blur,
+        TweenInfo.new(
+            0.25,
+            Enum.EasingStyle.Quad,
+            Enum.EasingDirection.Out
+        ),
+        {
+            Size = 0
+        }
+    ):Play()
+end
+
+--=========================
+-- TOGGLE
+--=========================
+local isOpen = true
+
+button.MouseButton1Click:Connect(function()
+
+    isOpen = not isOpen
+
+    if Window then
+        Window:Minimize(not isOpen)
+    end
+
+    button.Image = isOpen and imgOn or imgOff
+
+    -- BLUR
+    if isOpen then
+        OpenBlur()
+    else
+        CloseBlur()
+    end
+end)
+
+-- Load Success
+task.wait(2)
+print("Reaper Hub Loaded")

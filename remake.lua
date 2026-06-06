@@ -7,13 +7,13 @@ local loadSuccess = false
 
 -- Method 1: Load from GitHub (Original URL)
 local success1 = pcall(function()
-    vu1 = loadstring(game:HttpGet("https://github.com/dawid-scripts/Fluent/releases/latest/download/main.lua"))()
+    vu1 = loadstring(game:HttpGet("https://raw.githubusercontent.com/Swiftz007/Advanced/refs/heads/main/main.lua"))()
     loadSuccess = true
 end)
 
 -- If load fails, create Backup UI
 if not loadSuccess or not vu1 then
-    warn("⚠️ Failed to load Fluent UI! Creating backup UI...")
+    warn("Failed to load Fluent UI! Creating backup UI...")
     
     local sg = Instance.new("ScreenGui")
     sg.Name = "BananaCatBackup"
@@ -32,7 +32,7 @@ if not loadSuccess or not vu1 then
     local title = Instance.new("TextLabel")
     title.Size = UDim2.new(1, 0, 0, 40)
     title.BackgroundColor3 = Color3.fromRGB(255, 170, 0)
-    title.Text = "🍌 Banana Cat Hub - Blox Fruit"
+    title.Text = "Reaper Hub - Blox Fruits"
     title.TextColor3 = Color3.fromRGB(0, 0, 0)
     title.Font = Enum.Font.GothamBold
     title.TextSize = 16
@@ -42,7 +42,7 @@ if not loadSuccess or not vu1 then
     msg.Size = UDim2.new(1, -20, 1, -50)
     msg.Position = UDim2.new(0, 10, 0, 45)
     msg.BackgroundTransparency = 1
-    msg.Text = "ERROR: Unable to load Fluent UI!\n\nPossible Causes:\n• Executor doesn't support HttpGet\n• No internet connection\n• GitHub is blocked\n\nSolutions:\n✅ Use another executor (Synapse X, Fluxus)\n✅ Use VPN if GitHub is blocked\n✅ Check internet connection"
+    msg.Text = "ERROR"
     msg.TextColor3 = Color3.fromRGB(255, 255, 255)
     msg.Font = Enum.Font.Gotham
     msg.TextSize = 13
@@ -63,13 +63,13 @@ if not loadSuccess or not vu1 then
         sg:Destroy()
     end)
     
-    error("❌ Script cannot run because Fluent UI failed to load!")
+    error("Script cannot run because Fluent UI failed to load!")
     return
 end
 
 -- If load success, initialize window
 game:GetService("StarterGui"):SetCore("SendNotification", {
-    Title = "✅ Banana Cat Hub Loaded!";
+    Title = "Reaper Hub Loaded!";
     Text = "Press END to Toggle Menu | Script is Ready!";
     Duration = 5;
 })
@@ -78,11 +78,13 @@ local v2 = vu1:CreateWindow({
     ["Title"] = "Reaper Hub",
     ["SubTitle"] = "BloxFruits - Clack",
     ["TabWidth"] = 160,
-    ["Theme"] = "Darker",
+    ["Theme"] = "Reaper",
     ["Acrylic"] = false,
     ["Size"] = UDim2.fromOffset(500, 320),
     ["MinimizeKey"] = Enum.KeyCode.End
 })
+
+local icon = loadstring(game:HttpGet("https://raw.githubusercontent.com/Swiftz007/Libwtf/refs/heads/main/Icon.lua"))()
 
 -- MENU TOGGLE SYSTEM
 local MenuVisible = true 

@@ -1,5 +1,5 @@
 local Load = loadstring(game:HttpGet("https://raw.githubusercontent.com/Swiftz007/Libwtf/refs/heads/main/LoadLib.lua"))()
-
+--1
 local Players = game:GetService("Players")
 local RunService = game:GetService("RunService")
 local UserInputService = game:GetService("UserInputService")
@@ -121,7 +121,7 @@ stroke.Thickness = 2
 
 local title = Instance.new("TextLabel", main)
 title.Size = UDim2.new(1, 0, 0, 35)
-title.Text = "Reaper Hub V2"
+title.Text = "Reaper Hub V3"
 title.TextColor3 = Color3.fromRGB(255, 255, 255)
 title.Font = Enum.Font.GothamBold
 title.TextSize = 13
@@ -144,6 +144,15 @@ skipBtn.Text = "SKIP PLAYER"
 skipBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
 skipBtn.Font = Enum.Font.GothamMedium
 Instance.new("UICorner", skipBtn)
+
+local distLabel = Instance.new("TextLabel", main)
+distLabel.Size = UDim2.new(0.45, 0, 0, 30)
+distLabel.Position = UDim2.new(0.05, 0, 0.65, 0)
+distLabel.Text = "Distance:"
+distLabel.TextColor3 = Color3.fromRGB(180, 180, 180)
+distLabel.BackgroundTransparency = 1
+distLabel.Font = Enum.Font.Gotham
+distLabel.TextXAlignment = Enum.TextXAlignment.Left
 
 local distInput = Instance.new("TextBox", main)
 distInput.Size = UDim2.new(0.4, 0, 0, 25)

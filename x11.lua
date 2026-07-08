@@ -1,5 +1,3 @@
-local Load = loadstring(game:HttpGet("https://raw.githubusercontent.com/Swiftz007/Libwtf/refs/heads/main/LoadLib.lua"))()
-
 local Players = game:GetService("Players")
 local RunService = game:GetService("RunService")
 local UserInputService = game:GetService("UserInputService")
@@ -13,28 +11,41 @@ local humanoid = character:WaitForChild("Humanoid")
 local isEnabled = false
 local antiVoidEnabled = true
 local currentTarget = nil
-local followConnection = nil
-local noclipConnection = nil
 local followDistance = 3 
-local voidThreshold = -450 -- จุดที่ลึกที่สุดก่อนวาร์ปกลับ
-local recoveryHeight = 150 -- ความสูงที่จะวาร์ปกลับขึ้นมา
+local voidThreshold = -450 
+local recoveryHeight = 150 
 local charParts = {}
 
 -- === [ UTILITY FUNCTIONS ] ===
+
+local function makeDraggable(frame)
+    local dragging, dragInput, dragStart, startPos
+    frame.InputBegan:Connect(function(input)
+        if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
+            dragging = true
+            dragStart = input.Position
+            startPos = frame.Position
+            input.Changed:Connect(function()
+                if input.UserInputState == Enum.UserInputState.End then dragging = false end
+            end)
+        end
+    end)
+    frame.InputChanged:Connect(function(input)
+        if input.UserInputType == Enum.UserInputType.MouseMovement or input.UserInputType == Enum.UserInputType.Touch then dragInput = input end
+    end)
+    UserInputService.InputChanged:Connect(function(input)
+        if input == dragInput and dragging then
+            local delta = input.Position - dragStart
+            frame.Position = UDim2.new(startPos.X.Scale, startPos.X.Offset + delta.X, startPos.Y.Scale, startPos.Y.Offset + delta.Y)
+        end
+    end)
+end
 
 local function updateCharCache()
     charParts = {}
     if not character then return end
     for _, v in ipairs(character:GetDescendants()) do
         if v:IsA("BasePart") then table.insert(charParts, v) end
-    end
-end
-
-local function handleAntiVoid()
-    if not rootPart or not antiVoidEnabled then return end
-    if rootPart.Position.Y < voidThreshold then
-        rootPart.AssemblyLinearVelocity = Vector3.new(0, 0, 0)
-        rootPart.CFrame = CFrame.new(rootPart.Position.X, recoveryHeight, rootPart.Position.Z)
     end
 end
 
@@ -55,68 +66,50 @@ local function getNearestPlayer(exclude)
     return closestPlayer
 end
 
--- === [ CORE SYSTEM ] ===
-
-local function stopFollowing()
-    if followConnection then followConnection:Disconnect() followConnection = nil end
-    if noclipConnection then noclipConnection:Disconnect() noclipConnection = nil end
-    if humanoid then humanoid.PlatformStand = false end
-    for i = 1, #charParts do
-        if charParts[i] then charParts[i].CanCollide = true end
-    end
-    if rootPart then
-        rootPart.AssemblyLinearVelocity = Vector3.new(0, 0, 0)
-        rootPart.AssemblyAngularVelocity = Vector3.new(0, 0, 0)
-    end
-end
-
-local function startFollowing()
-    stopFollowing()
-    if humanoid then humanoid.PlatformStand = true end
-    updateCharCache()
-
-    noclipConnection = RunService.Stepped:Connect(function()
-        for i = 1, #charParts do
-            if charParts[i] then charParts[i].CanCollide = false end
-        end
-    end)
-
-    followConnection = RunService.Heartbeat:Connect(function()
-        handleAntiVoid() -- รันระบบกันตกแมพตลอดเวลาในขณะที่สคริปต์ทำงาน
-        
-        if not isEnabled then return end
-
-        if not currentTarget or not currentTarget.Parent or not currentTarget.Character or currentTarget.Character.Humanoid.Health <= 0 then
-            currentTarget = getNearestPlayer()
-            return
-        end
-
-        local targetRoot = currentTarget.Character:FindFirstChild("HumanoidRootPart")
-        if targetRoot and character then
-            character:PivotTo(targetRoot.CFrame * CFrame.new(0, 0, followDistance))
-            rootPart.AssemblyLinearVelocity = targetRoot.AssemblyLinearVelocity
-            rootPart.AssemblyAngularVelocity = Vector3.new(0, 0, 0)
-        end
-    end)
-end
-
 -- === [ GUI SETUP ] ===
 
 local screenGui = Instance.new("ScreenGui", player:WaitForChild("PlayerGui"))
-screenGui.Name = "ReaperPro"
+screenGui.Name = "ReaperPro_V4"
 screenGui.ResetOnSpawn = false
 
+-- Main Frame
 local main = Instance.new("Frame", screenGui)
-main.Size = UDim2.new(0, 200, 0, 230) -- ขยายขนาดรองรับปุ่มใหม่
+main.Size = UDim2.new(0, 200, 0, 235)
 main.Position = UDim2.new(0.5, -100, 0.5, -115)
 main.BackgroundColor3 = Color3.fromRGB(12, 12, 12)
 main.BorderSizePixel = 0
 main.Active = true 
+main.Visible = true
 Instance.new("UICorner", main).CornerRadius = UDim.new(0, 10)
 local stroke = Instance.new("UIStroke", main)
 stroke.Color = Color3.fromRGB(200, 0, 0)
 stroke.Thickness = 2
+makeDraggable(main)
 
+-- Toggle Button (Logo)
+local toggleIcon = Instance.new("Frame", screenGui)
+toggleIcon.Name = "LogoToggle"
+toggleIcon.Size = UDim2.new(0, 40, 0, 40)
+toggleIcon.Position = UDim2.new(0.1, 0, 0.1, 0)
+toggleIcon.BackgroundColor3 = Color3.fromRGB(15, 15, 15)
+toggleIcon.Active = true
+Instance.new("UICorner", toggleIcon).CornerRadius = UDim.new(0, 10)
+local iconStroke = Instance.new("UIStroke", toggleIcon)
+iconStroke.Color = Color3.fromRGB(200, 0, 0)
+iconStroke.Thickness = 1.5
+
+local img = Instance.new("ImageButton", toggleIcon)
+img.Size = UDim2.new(0.8, 0, 0.8, 0)
+img.Position = UDim2.new(0.1, 0, 0.1, 0)
+img.BackgroundTransparency = 1
+img.Image = "rbxassetid://86279908104891"
+makeDraggable(toggleIcon)
+
+img.MouseButton1Click:Connect(function()
+    main.Visible = not main.Visible
+end)
+
+-- UI Elements
 local title = Instance.new("TextLabel", main)
 title.Size = UDim2.new(1, 0, 0, 35)
 title.Text = "REAPER HUB V4"
@@ -125,14 +118,14 @@ title.Font = Enum.Font.GothamBold
 title.TextSize = 14
 title.BackgroundTransparency = 1
 
-local toggleBtn = Instance.new("TextButton", main)
-toggleBtn.Size = UDim2.new(0.9, 0, 0, 32)
-toggleBtn.Position = UDim2.new(0.05, 0, 0.18, 0)
-toggleBtn.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
-toggleBtn.Text = "FOLLOW: OFF"
-toggleBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
-toggleBtn.Font = Enum.Font.GothamMedium
-Instance.new("UICorner", toggleBtn)
+local followBtn = Instance.new("TextButton", main)
+followBtn.Size = UDim2.new(0.9, 0, 0, 32)
+followBtn.Position = UDim2.new(0.05, 0, 0.18, 0)
+followBtn.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
+followBtn.Text = "FOLLOW: OFF"
+followBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
+followBtn.Font = Enum.Font.GothamMedium
+Instance.new("UICorner", followBtn)
 
 local antiVoidBtn = Instance.new("TextButton", main)
 antiVoidBtn.Size = UDim2.new(0.9, 0, 0, 32)
@@ -161,13 +154,40 @@ distInput.TextColor3 = Color3.fromRGB(255, 255, 255)
 distInput.Font = Enum.Font.GothamMedium
 Instance.new("UICorner", distInput)
 
--- === [ INTERACTIONS ] ===
+-- === [ CORE LOGIC ] ===
 
-toggleBtn.MouseButton1Click:Connect(function()
+RunService.Heartbeat:Connect(function()
+    -- Anti-Void (ทำงานตลอดถ้าเปิดไว้)
+    if antiVoidEnabled and rootPart and rootPart.Position.Y < voidThreshold then
+        rootPart.AssemblyLinearVelocity = Vector3.new(0,0,0)
+        rootPart.CFrame = CFrame.new(rootPart.Position.X, recoveryHeight, rootPart.Position.Z)
+    end
+
+    -- Follow Logic
+    if isEnabled then
+        if not currentTarget or not currentTarget.Character or not currentTarget.Character:FindFirstChild("Humanoid") or currentTarget.Character.Humanoid.Health <= 0 then
+            currentTarget = getNearestPlayer()
+        else
+            local targetRoot = currentTarget.Character:FindFirstChild("HumanoidRootPart")
+            if targetRoot then
+                character:PivotTo(targetRoot.CFrame * CFrame.new(0, 0, followDistance))
+                rootPart.AssemblyLinearVelocity = targetRoot.AssemblyLinearVelocity
+                for _, v in ipairs(charParts) do if v then v.CanCollide = false end end
+            end
+        end
+    end
+end)
+
+-- Interactions
+followBtn.MouseButton1Click:Connect(function()
     isEnabled = not isEnabled
-    toggleBtn.Text = isEnabled and "FOLLOW: ACTIVE" or "FOLLOW: OFF"
-    toggleBtn.BackgroundColor3 = isEnabled and Color3.fromRGB(200, 0, 0) or Color3.fromRGB(30, 30, 30)
-    if isEnabled then startFollowing() else stopFollowing() end
+    updateCharCache()
+    followBtn.Text = isEnabled and "FOLLOW: ACTIVE" or "FOLLOW: OFF"
+    followBtn.BackgroundColor3 = isEnabled and Color3.fromRGB(200, 0, 0) or Color3.fromRGB(30, 30, 30)
+    humanoid.PlatformStand = isEnabled
+    if not isEnabled then
+        for _, v in ipairs(charParts) do if v then v.CanCollide = true end end
+    end
 end)
 
 antiVoidBtn.MouseButton1Click:Connect(function()
@@ -176,9 +196,7 @@ antiVoidBtn.MouseButton1Click:Connect(function()
     antiVoidBtn.BackgroundColor3 = antiVoidEnabled and Color3.fromRGB(0, 120, 0) or Color3.fromRGB(30, 30, 30)
 end)
 
-skipBtn.MouseButton1Click:Connect(function()
-    currentTarget = getNearestPlayer(currentTarget)
-end)
+skipBtn.MouseButton1Click:Connect(function() currentTarget = getNearestPlayer(currentTarget) end)
 
 distInput.FocusLost:Connect(function()
     local n = tonumber(distInput.Text:match("%d+"))
@@ -186,27 +204,9 @@ distInput.FocusLost:Connect(function()
     distInput.Text = "Distance: " .. tostring(followDistance)
 end)
 
--- Draggable Script
-local function makeDraggable(frame)
-    local dragging, dragInput, dragStart, startPos
-    frame.InputBegan:Connect(function(input)
-        if input.UserInputType == Enum.UserInputType.MouseButton1 then dragging = true dragStart = input.Position startPos = frame.Position end
-    end)
-    UserInputService.InputChanged:Connect(function(input)
-        if dragging and input.UserInputType == Enum.UserInputType.MouseMovement then
-            local delta = input.Position - dragStart
-            frame.Position = UDim2.new(startPos.X.Scale, startPos.X.Offset + delta.X, startPos.Y.Scale, startPos.Y.Offset + delta.Y)
-        end
-    end)
-    UserInputService.InputEnded:Connect(function(input) if input.UserInputType == Enum.UserInputType.MouseButton1 then dragging = false end end)
-end
-makeDraggable(main)
-
--- Character Auto-Update
 player.CharacterAdded:Connect(function(char)
     character, rootPart, humanoid = char, char:WaitForChild("HumanoidRootPart"), char:WaitForChild("Humanoid")
     updateCharCache()
-    if isEnabled then task.wait(0.1) startFollowing() end
 end)
 
 

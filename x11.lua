@@ -69,7 +69,7 @@ end
 -- === [ GUI SETUP ] ===
 
 local screenGui = Instance.new("ScreenGui", player:WaitForChild("PlayerGui"))
-screenGui.Name = "ReaperPro_V4"
+screenGui.Name = "ReaperPro"
 screenGui.ResetOnSpawn = false
 
 -- Main Frame
@@ -112,7 +112,7 @@ end)
 -- UI Elements
 local title = Instance.new("TextLabel", main)
 title.Size = UDim2.new(1, 0, 0, 35)
-title.Text = "REAPER HUB V4"
+title.Text = "REAPER HUB V5"
 title.TextColor3 = Color3.fromRGB(255, 255, 255)
 title.Font = Enum.Font.GothamBold
 title.TextSize = 14

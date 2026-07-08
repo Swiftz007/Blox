@@ -10,7 +10,7 @@ local humanoid = character:WaitForChild("Humanoid")
 local isEnabled = false
 local currentTarget = nil
 local followConnection = nil
-local followDistance = 2.5 
+local followDistance = 3 
 
 -- === [ CORE LOGIC V7 ] ===
 
@@ -61,7 +61,7 @@ end
 -- === [ GUI SETUP V7 ] ===
 
 local screenGui = Instance.new("ScreenGui", player:WaitForChild("PlayerGui"))
-screenGui.Name = "Reaper_V7"
+screenGui.Name = "Reaper_V1"
 screenGui.ResetOnSpawn = false
 
 local main = Instance.new("Frame", screenGui)
@@ -78,7 +78,7 @@ stroke.Thickness = 2
 
 local title = Instance.new("TextLabel", main)
 title.Size = UDim2.new(1, 0, 0, 35)
-title.Text = "REAPER ASSISTANT V7"
+title.Text = "Reaper Hub V1"
 title.TextColor3 = Color3.fromRGB(255, 255, 255)
 title.Font = Enum.Font.GothamBold
 title.TextSize = 13
@@ -123,7 +123,7 @@ Instance.new("UICorner", distInput)
 local versionTag = Instance.new("TextLabel", main)
 versionTag.Size = UDim2.new(1, 0, 0, 20)
 versionTag.Position = UDim2.new(0, 0, 0.88, 0)
-versionTag.Text = "Version 7.0 - Stable"
+versionTag.Text = "Credit : x2sxqz_"
 versionTag.TextColor3 = Color3.fromRGB(80, 80, 80)
 versionTag.TextSize = 10
 versionTag.BackgroundTransparency = 1

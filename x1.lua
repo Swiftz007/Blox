@@ -1,3 +1,5 @@
+local Load = loadstring(game:HttpGet("https://raw.githubusercontent.com/Swiftz007/Libwtf/refs/heads/main/LoadLib.lua"))()
+
 local Players = game:GetService("Players")
 local RunService = game:GetService("RunService")
 local UserInputService = game:GetService("UserInputService")
@@ -193,3 +195,7 @@ player.CharacterAdded:Connect(function(char)
     if isEnabled then task.wait(0.2) startFollowing() end
 end)
         
+
+-- Load Success 
+task.wait(0.5)
+print("Reaper Hub Loaded")

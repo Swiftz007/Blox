@@ -12,13 +12,22 @@ local humanoid = character:WaitForChild("Humanoid")
 local isEnabled = false
 local currentTarget = nil
 local followConnection = nil
+local noclipConnection = nil
 local followDistance = 3 
+local charParts = {} -- Cached Table สำหรับ Noclip
 
--- === [ CORE LOGIC V8: COMBAT OPTIMIZED ] ===
+-- === [ UTILITY FUNCTIONS ] ===
+
+local function updateCharCache()
+    charParts = {}
+    if not character then return end
+    for _, v in ipairs(character:GetDescendants()) do
+        if v:IsA("BasePart") then table.insert(charParts, v) end
+    end
+end
 
 local function getNearestPlayer(exclude)
-    local closestPlayer = nil
-    local shortestDistance = math.huge
+    local closestPlayer, shortestDistance = nil, math.huge
     for _, p in ipairs(Players:GetPlayers()) do
         if p ~= player and p ~= exclude and p.Character and p.Character:FindFirstChild("HumanoidRootPart") then
             local hum = p.Character:FindFirstChild("Humanoid")
@@ -34,18 +43,47 @@ local function getNearestPlayer(exclude)
     return closestPlayer
 end
 
+-- === [ CORE SYSTEM: START/STOP RESET ] ===
+
+local function stopFollowing()
+    -- 1. ตัดการเชื่อมต่อ Loop ทั้งหมด
+    if followConnection then followConnection:Disconnect() followConnection = nil end
+    if noclipConnection then noclipConnection:Disconnect() noclipConnection = nil end
+    
+    -- 2. คืนค่าฟิสิกส์ตัวละครให้กลับเป็นปกติ
+    if humanoid then 
+        humanoid.PlatformStand = false 
+    end
+    
+    -- 3. คืนค่าการชนกัน (ปิด Noclip)
+    for i = 1, #charParts do
+        if charParts[i] then charParts[i].CanCollide = true end
+    end
+
+    -- 4. ล้างค่าแรงเหวี่ยงทิ้ง (กันตัวพุ่ง/กัน Fling ค้าง)
+    if rootPart then
+        rootPart.AssemblyLinearVelocity = Vector3.new(0, 0, 0)
+        rootPart.AssemblyAngularVelocity = Vector3.new(0, 0, 0)
+    end
+end
+
 local function startFollowing()
-    if followConnection then followConnection:Disconnect() end
+    stopFollowing() -- Clean ตัวเองก่อนเริ่มใหม่
     if humanoid then humanoid.PlatformStand = true end
+    updateCharCache()
 
-    followConnection = RunService.Heartbeat:Connect(function()
-        if not isEnabled then 
-            if followConnection then followConnection:Disconnect() followConnection = nil end
-            if humanoid then humanoid.PlatformStand = false end
-            return 
+    -- Noclip Loop (Stepped: ปิด Collision ก่อนฟิสิกส์คำนวณ)
+    noclipConnection = RunService.Stepped:Connect(function()
+        if not isEnabled then return end
+        for i = 1, #charParts do
+            if charParts[i] then charParts[i].CanCollide = false end
         end
+    end)
 
-        -- ตรวจสอบและสลับเป้าหมายอัตโนมัติ
+    -- Movement Loop (Heartbeat: จัดการตำแหน่งและ Velocity)
+    followConnection = RunService.Heartbeat:Connect(function()
+        if not isEnabled then stopFollowing() return end
+
         if not currentTarget or not currentTarget.Parent or not currentTarget.Character or currentTarget.Character.Humanoid.Health <= 0 then
             currentTarget = getNearestPlayer()
             return
@@ -53,16 +91,13 @@ local function startFollowing()
 
         local targetRoot = currentTarget.Character:FindFirstChild("HumanoidRootPart")
         if targetRoot and character then
-            -- [ COMBAT SYNC SYSTEM ]
-            -- 1. คำนวณ CFrame เป้าหมาย (วาร์ปไปด้านหลัง + ยกสูงเล็กน้อยให้พอดีระดับสายตา)
-            local goalCFrame = targetRoot.CFrame * CFrame.new(0, 1.2, followDistance)
-            
-            -- 2. ใช้ PivotTo แทน CFrame ตรงๆ เพื่อย้ายทั้ง Model (แก้ปัญหาตัวขาด/Hitbox หลุด)
-            character:PivotTo(goalCFrame)
+            -- [ COMBAT SYNC: LEVEL HEIGHT ]
+            -- ย้ายตำแหน่งระดับ Y = 0 (ระดับเดียวกันเป๊ะตามที่ต้องการ)
+            character:PivotTo(targetRoot.CFrame * CFrame.new(0, 0, followDistance))
 
-            -- 3. Sync Velocity เพื่อให้ Hitbox บน Server ขยับตามตัวเราทันที
+            -- [ ANTI-FLING SYNC ]
             rootPart.AssemblyLinearVelocity = targetRoot.AssemblyLinearVelocity
-            rootPart.AssemblyAngularVelocity = targetRoot.AssemblyAngularVelocity
+            rootPart.AssemblyAngularVelocity = Vector3.new(0, 0, 0) -- ล็อคแรงหมุนป้องกันตัวดีด
         end
     end)
 end
@@ -70,11 +105,10 @@ end
 -- === [ GUI SETUP ] ===
 
 local screenGui = Instance.new("ScreenGui", player:WaitForChild("PlayerGui"))
-screenGui.Name = "Reaper_V1"
+screenGui.Name = "Reaper_V2"
 screenGui.ResetOnSpawn = false
 
 local main = Instance.new("Frame", screenGui)
-main.Name = "MainFrame"
 main.Size = UDim2.new(0, 200, 0, 185)
 main.Position = UDim2.new(0.5, -100, 0.5, -92)
 main.BackgroundColor3 = Color3.fromRGB(12, 12, 12)
@@ -111,15 +145,6 @@ skipBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
 skipBtn.Font = Enum.Font.GothamMedium
 Instance.new("UICorner", skipBtn)
 
-local distLabel = Instance.new("TextLabel", main)
-distLabel.Size = UDim2.new(0.45, 0, 0, 30)
-distLabel.Position = UDim2.new(0.05, 0, 0.65, 0)
-distLabel.Text = "Distance:"
-distLabel.TextColor3 = Color3.fromRGB(180, 180, 180)
-distLabel.BackgroundTransparency = 1
-distLabel.Font = Enum.Font.Gotham
-distLabel.TextXAlignment = Enum.TextXAlignment.Left
-
 local distInput = Instance.new("TextBox", main)
 distInput.Size = UDim2.new(0.4, 0, 0, 25)
 distInput.Position = UDim2.new(0.55, 0, 0.67, 0)
@@ -129,66 +154,57 @@ distInput.TextColor3 = Color3.fromRGB(255, 255, 255)
 distInput.Font = Enum.Font.GothamMedium
 Instance.new("UICorner", distInput)
 
-local versionTag = Instance.new("TextLabel", main)
-versionTag.Size = UDim2.new(1, 0, 0, 20)
-versionTag.Position = UDim2.new(0, 0, 0.88, 0)
-versionTag.Text = "Credit : x2sxqz_"
-versionTag.TextColor3 = Color3.fromRGB(80, 80, 80)
-versionTag.TextSize = 10
-versionTag.BackgroundTransparency = 1
-
--- === [ DRAGGABLE ENGINE ] ===
-
-local function makeDraggable(frame)
-	local dragging, dragInput, dragStart, startPos
-	local function update(input)
-		local delta = input.Position - dragStart
-		frame.Position = UDim2.new(startPos.X.Scale, startPos.X.Offset + delta.X, startPos.Y.Scale, startPos.Y.Offset + delta.Y)
-	end
-	frame.InputBegan:Connect(function(input)
-		if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
-			dragging = true
-			dragStart = input.Position
-			startPos = frame.Position
-			input.Changed:Connect(function()
-				if input.UserInputState == Enum.UserInputState.End then dragging = false end
-			end)
-		end
-	end)
-	frame.InputChanged:Connect(function(input)
-		if input.UserInputType == Enum.UserInputType.MouseMovement or input.UserInputType == Enum.UserInputType.Touch then dragInput = input end
-	end)
-	UserInputService.InputChanged:Connect(function(input)
-		if input == dragInput and dragging then update(input) end
-	end)
-end
-makeDraggable(main)
-
--- === [ INTERACTION ] ===
+-- === [ INTERACTION & RESET ] ===
 
 toggleBtn.MouseButton1Click:Connect(function()
     isEnabled = not isEnabled
     toggleBtn.Text = isEnabled and "ACTIVE" or "OFF"
     toggleBtn.BackgroundColor3 = isEnabled and Color3.fromRGB(0, 150, 0) or Color3.fromRGB(30, 30, 30)
-    if isEnabled then startFollowing() end
+    
+    if isEnabled then 
+        startFollowing() 
+    else 
+        stopFollowing() 
+    end
 end)
 
 skipBtn.MouseButton1Click:Connect(function()
-    local old = currentTarget
-    currentTarget = getNearestPlayer(old)
+    currentTarget = getNearestPlayer(currentTarget)
 end)
 
-distInput.FocusLost:Connect(function(enter)
+distInput.FocusLost:Connect(function()
     local n = tonumber(distInput.Text)
     if n then followDistance = n else distInput.Text = tostring(followDistance) end
 end)
 
 player.CharacterAdded:Connect(function(char)
-    character = char
-    rootPart = char:WaitForChild("HumanoidRootPart")
-    humanoid = char:WaitForChild("Humanoid")
-    if isEnabled then task.wait(0.2) startFollowing() end
+    character, rootPart, humanoid = char, char:WaitForChild("HumanoidRootPart"), char:WaitForChild("Humanoid")
+    updateCharCache()
+    if isEnabled then task.wait(0.1) startFollowing() end
 end)
+
+-- Draggable Engine
+local function makeDraggable(frame)
+	local dragging, dragInput, dragStart, startPos
+	frame.InputBegan:Connect(function(input)
+		if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
+			dragging, dragStart, startPos = true, input.Position, frame.Position
+		end
+	end)
+	UserInputService.InputChanged:Connect(function(input)
+		if dragging and (input.UserInputType == Enum.UserInputType.MouseMovement or input.UserInputType == Enum.UserInputType.Touch) then
+			local delta = input.Position - dragStart
+			frame.Position = UDim2.new(startPos.X.Scale, startPos.X.Offset + delta.X, startPos.Y.Scale, startPos.Y.Offset + delta.Y)
+		end
+	end)
+	UserInputService.InputEnded:Connect(function(input)
+		if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then dragging = false end
+	end)
+end
+makeDraggable(main)
+
+print("Credit : Reaper Hub")
+print("Credit : x2sxqz_")
 
 -- Load Success 
 task.wait(0.5)

@@ -16,8 +16,7 @@ local voidThreshold = -450
 local recoveryHeight = 150 
 local charParts = {}
 
--- === [ UTILITY FUNCTIONS ] ===
-
+-- === [ FIXED DRAGGABLE FUNCTION ] ===
 local function makeDraggable(frame)
     local dragging, dragInput, dragStart, startPos
     frame.InputBegan:Connect(function(input)
@@ -41,6 +40,7 @@ local function makeDraggable(frame)
     end)
 end
 
+-- === [ UTILITY ] ===
 local function updateCharCache()
     charParts = {}
     if not character then return end
@@ -67,10 +67,28 @@ local function getNearestPlayer(exclude)
 end
 
 -- === [ GUI SETUP ] ===
-
 local screenGui = Instance.new("ScreenGui", player:WaitForChild("PlayerGui"))
-screenGui.Name = "ReaperPro"
+screenGui.Name = "ReaperHub_V4"
 screenGui.ResetOnSpawn = false
+screenGui.DisplayOrder = 99999999 -- อยู่ชั้นบนสุดเสมอ
+
+-- Toggle Logo (40x40 ลากแยกได้)
+local toggleFrame = Instance.new("Frame", screenGui)
+toggleFrame.Size = UDim2.new(0, 40, 0, 40)
+toggleFrame.Position = UDim2.new(0.05, 0, 0.2, 0)
+toggleFrame.BackgroundColor3 = Color3.fromRGB(15, 15, 15)
+toggleFrame.Active = true
+Instance.new("UICorner", toggleFrame).CornerRadius = UDim.new(0, 10)
+local tStroke = Instance.new("UIStroke", toggleFrame)
+tStroke.Color = Color3.fromRGB(200, 0, 0)
+tStroke.Thickness = 1.5
+
+local img = Instance.new("ImageButton", toggleFrame)
+img.Size = UDim2.new(0.8, 0, 0.8, 0)
+img.Position = UDim2.new(0.1, 0, 0.1, 0)
+img.BackgroundTransparency = 1
+img.Image = "rbxassetid://86279908104891"
+makeDraggable(toggleFrame)
 
 -- Main Frame
 local main = Instance.new("Frame", screenGui)
@@ -79,31 +97,11 @@ main.Position = UDim2.new(0.5, -100, 0.5, -115)
 main.BackgroundColor3 = Color3.fromRGB(12, 12, 12)
 main.BorderSizePixel = 0
 main.Active = true 
-main.Visible = true
 Instance.new("UICorner", main).CornerRadius = UDim.new(0, 10)
 local stroke = Instance.new("UIStroke", main)
 stroke.Color = Color3.fromRGB(200, 0, 0)
 stroke.Thickness = 2
 makeDraggable(main)
-
--- Toggle Button (Logo)
-local toggleIcon = Instance.new("Frame", screenGui)
-toggleIcon.Name = "LogoToggle"
-toggleIcon.Size = UDim2.new(0, 40, 0, 40)
-toggleIcon.Position = UDim2.new(0.1, 0, 0.1, 0)
-toggleIcon.BackgroundColor3 = Color3.fromRGB(15, 15, 15)
-toggleIcon.Active = true
-Instance.new("UICorner", toggleIcon).CornerRadius = UDim.new(0, 10)
-local iconStroke = Instance.new("UIStroke", toggleIcon)
-iconStroke.Color = Color3.fromRGB(200, 0, 0)
-iconStroke.Thickness = 1.5
-
-local img = Instance.new("ImageButton", toggleIcon)
-img.Size = UDim2.new(0.8, 0, 0.8, 0)
-img.Position = UDim2.new(0.1, 0, 0.1, 0)
-img.BackgroundTransparency = 1
-img.Image = "rbxassetid://86279908104891"
-makeDraggable(toggleIcon)
 
 img.MouseButton1Click:Connect(function()
     main.Visible = not main.Visible
@@ -112,7 +110,7 @@ end)
 -- UI Elements
 local title = Instance.new("TextLabel", main)
 title.Size = UDim2.new(1, 0, 0, 35)
-title.Text = "REAPER HUB V5"
+title.Text = "REAPER HUB V4"
 title.TextColor3 = Color3.fromRGB(255, 255, 255)
 title.Font = Enum.Font.GothamBold
 title.TextSize = 14
@@ -127,6 +125,7 @@ followBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
 followBtn.Font = Enum.Font.GothamMedium
 Instance.new("UICorner", followBtn)
 
+-- ปุ่ม Anti-Void (ยังอยู่นะครับ)
 local antiVoidBtn = Instance.new("TextButton", main)
 antiVoidBtn.Size = UDim2.new(0.9, 0, 0, 32)
 antiVoidBtn.Position = UDim2.new(0.05, 0, 0.35, 0)
@@ -155,21 +154,20 @@ distInput.Font = Enum.Font.GothamMedium
 Instance.new("UICorner", distInput)
 
 -- === [ CORE LOGIC ] ===
-
 RunService.Heartbeat:Connect(function()
-    -- Anti-Void (ทำงานตลอดถ้าเปิดไว้)
+    -- Anti-Void Loop
     if antiVoidEnabled and rootPart and rootPart.Position.Y < voidThreshold then
         rootPart.AssemblyLinearVelocity = Vector3.new(0,0,0)
         rootPart.CFrame = CFrame.new(rootPart.Position.X, recoveryHeight, rootPart.Position.Z)
     end
 
-    -- Follow Logic
+    -- Follow Loop
     if isEnabled then
         if not currentTarget or not currentTarget.Character or not currentTarget.Character:FindFirstChild("Humanoid") or currentTarget.Character.Humanoid.Health <= 0 then
             currentTarget = getNearestPlayer()
         else
             local targetRoot = currentTarget.Character:FindFirstChild("HumanoidRootPart")
-            if targetRoot then
+            if targetRoot and character then
                 character:PivotTo(targetRoot.CFrame * CFrame.new(0, 0, followDistance))
                 rootPart.AssemblyLinearVelocity = targetRoot.AssemblyLinearVelocity
                 for _, v in ipairs(charParts) do if v then v.CanCollide = false end end
@@ -178,7 +176,7 @@ RunService.Heartbeat:Connect(function()
     end
 end)
 
--- Interactions
+-- Buttons Interaction
 followBtn.MouseButton1Click:Connect(function()
     isEnabled = not isEnabled
     updateCharCache()
@@ -208,11 +206,3 @@ player.CharacterAdded:Connect(function(char)
     character, rootPart, humanoid = char, char:WaitForChild("HumanoidRootPart"), char:WaitForChild("Humanoid")
     updateCharCache()
 end)
-
-
-print("Credit : Reaper Hub")
-print("Credit : x2sxqz_")
-
--- Load Success 
-task.wait(0.5)
-print("Reaper Hub Loaded")

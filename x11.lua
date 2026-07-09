@@ -13,7 +13,7 @@ local antiVoidEnabled = true
 local currentTarget = nil
 local followDistance = 4
 local voidThreshold = -450 
-local recoveryHeight = 150 
+local recoveryHeight = 600
 local charParts = {}
 
 -- === [ STABLE DRAGGABLE SYSTEM ] ===

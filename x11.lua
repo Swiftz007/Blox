@@ -1,4 +1,4 @@
--- [[ REAPER HUB V9 - HYBRID CLICKS ]] --
+-- [[ REAPER HUB V10 - HYBRID & FULL GUI ]] --
 local Players = game:GetService("Players")
 local RunService = game:GetService("RunService")
 local UserInputService = game:GetService("UserInputService")
@@ -19,7 +19,7 @@ local voidThreshold = -450
 local recoveryHeight = 600
 local charParts = {}
 
--- Mobile/PC Settings
+-- Mobile/PC Logic Variables
 local farmMode = nil -- "PC" or "Mobile"
 local mobileClickPos = nil
 
@@ -75,17 +75,40 @@ end
 
 -- === [ GUI SETUP ] ===
 local screenGui = Instance.new("ScreenGui", player:WaitForChild("PlayerGui"))
-screenGui.Name = "ReaperPro"
+screenGui.Name = "ReaperV10_Final"
 screenGui.ResetOnSpawn = false
 screenGui.IgnoreGuiInset = true
+
+-- Toggle Logo
+local toggleFrame = Instance.new("Frame", screenGui)
+toggleFrame.Size = UDim2.new(0, 55, 0, 55)
+toggleFrame.Position = UDim2.new(0.05, 0, 0.15, 0)
+toggleFrame.BackgroundColor3 = Color3.fromRGB(15, 15, 15)
+Instance.new("UICorner", toggleFrame).CornerRadius = UDim.new(0, 12)
+local tStroke = Instance.new("UIStroke", toggleFrame)
+tStroke.Color = Color3.fromRGB(255, 0, 0)
+tStroke.Thickness = 2
+
+local img = Instance.new("ImageButton", toggleFrame)
+img.Size = UDim2.new(0.8, 0, 0.8, 0)
+img.Position = UDim2.new(0.1, 0, 0.1, 0)
+img.BackgroundTransparency = 1
+img.Image = "rbxassetid://86279908104891"
 
 -- Main Frame
 local main = Instance.new("Frame", screenGui)
 main.Size = UDim2.new(0, 200, 0, 280)
 main.Position = UDim2.new(0.5, -100, 0.5, -140)
-main.BackgroundColor3 = Color3.fromRGB(15, 15, 15)
-Instance.new("UICorner", main)
+main.BackgroundColor3 = Color3.fromRGB(12, 12, 12)
+main.Visible = true
+Instance.new("UICorner", main).CornerRadius = UDim.new(0, 10)
+local stroke = Instance.new("UIStroke", main)
+stroke.Color = Color3.fromRGB(200, 0, 0)
+stroke.Thickness = 2
+
+makeDraggable(img, toggleFrame)
 makeDraggable(main, main)
+img.MouseButton1Click:Connect(function() main.Visible = not main.Visible end)
 
 local function createBtn(text, pos, color, parent)
     local btn = Instance.new("TextButton", parent or main)
@@ -99,10 +122,25 @@ local function createBtn(text, pos, color, parent)
     return btn
 end
 
+local title = Instance.new("TextLabel", main)
+title.Size = UDim2.new(1, 0, 0, 35)
+title.Text = "REAPER HUB V10"
+title.TextColor3 = Color3.fromRGB(255, 255, 255)
+title.Font = Enum.Font.GothamBold
+title.BackgroundTransparency = 1
+
 local farmBtn = createBtn("AUTO FARM: OFF", UDim2.new(0.05, 0, 0.15, 0), Color3.fromRGB(30, 30, 30))
-local followBtn = createBtn("FOLLOW: OFF", UDim2.new(0.05, 0, 0.30, 0), Color3.fromRGB(30, 30, 30))
-local antiVoidBtn = createBtn("ANTI-VOID: ON", UDim2.new(0.05, 0, 0.45, 0), Color3.fromRGB(0, 120, 0))
-local skipBtn = createBtn("SKIP PLAYER", UDim2.new(0.05, 0, 0.60, 0), Color3.fromRGB(120, 0, 0))
+local followBtn = createBtn("FOLLOW: OFF", UDim2.new(0.05, 0, 0.28, 0), Color3.fromRGB(30, 30, 30))
+local antiVoidBtn = createBtn("ANTI-VOID: ON", UDim2.new(0.05, 0, 0.41, 0), Color3.fromRGB(0, 120, 0))
+local skipBtn = createBtn("SKIP PLAYER", UDim2.new(0.05, 0, 0.54, 0), Color3.fromRGB(120, 0, 0))
+
+local distInput = Instance.new("TextBox", main)
+distInput.Size = UDim2.new(0.9, 0, 0, 30)
+distInput.Position = UDim2.new(0.05, 0, 0.72, 0)
+distInput.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
+distInput.Text = "Distance: " .. tostring(followDistance)
+distInput.TextColor3 = Color3.fromRGB(255, 255, 255)
+Instance.new("UICorner", distInput)
 
 -- === [ MODE SELECTION UI ] ===
 local modeFrame = Instance.new("Frame", screenGui)
@@ -123,7 +161,7 @@ mTitle.BackgroundTransparency = 1
 local pcBtn = createBtn("PC (MOUSE 1)", UDim2.new(0.05, 0, 0.35, 0), Color3.fromRGB(50, 50, 50), modeFrame)
 local mbBtn = createBtn("MOBILE (TAP POS)", UDim2.new(0.05, 0, 0.65, 0), Color3.fromRGB(50, 50, 50), modeFrame)
 
--- === [ MOBILE TAP SETUP UI ] ===
+-- === [ MOBILE TAP SETUP ] ===
 local tapSetup = Instance.new("Frame", screenGui)
 tapSetup.Size = UDim2.new(0, 60, 0, 60)
 tapSetup.Position = UDim2.new(0.8, 0, 0.8, 0)
@@ -133,11 +171,11 @@ tapSetup.Visible = false
 Instance.new("UICorner", tapSetup).CornerRadius = UDim.new(1, 0)
 makeDraggable(tapSetup, tapSetup)
 
-local saveTap = createBtn("SAVE POS", UDim2.new(0, 100, 0, 40), UDim2.new(0.5, -50, 1.2, 0), Color3.fromRGB(0, 150, 0), tapSetup)
+local saveTap = createBtn("SAVE POS", UDim2.new(0, 100, 0, 35), UDim2.new(0.5, -50, 1.1, 0), Color3.fromRGB(0, 150, 0), tapSetup)
 
--- === [ FARMING LOOPS ] ===
+-- === [ LOOPS ] ===
 
--- Auto Click / Tap
+-- Hybrid Click (PC M1 / Mobile Tap)
 task.spawn(function()
     while true do
         task.wait(0.05)
@@ -167,7 +205,7 @@ task.spawn(function()
     end
 end)
 
--- Skills (1,2,3,4)
+-- Skill Rotation (1,2,3,4)
 task.spawn(function()
     local keys = {Enum.KeyCode.One, Enum.KeyCode.Two, Enum.KeyCode.Three, Enum.KeyCode.Four}
     while true do
@@ -182,7 +220,7 @@ task.spawn(function()
     end
 end)
 
--- === [ CORE FOLLOW LOOP ] ===
+-- Core Follow & Anti-Void
 RunService.Heartbeat:Connect(function()
     if antiVoidEnabled and rootPart and rootPart.Position.Y < voidThreshold then
         rootPart.CFrame = CFrame.new(rootPart.Position.X, recoveryHeight, rootPart.Position.Z)
@@ -202,10 +240,9 @@ RunService.Heartbeat:Connect(function()
     end
 end)
 
--- === [ BUTTON LOGIC ] ===
+-- === [ EVENTS ] ===
 farmBtn.MouseButton1Click:Connect(function()
-    if not autoFarmEnabled then
-        modeFrame.Visible = true -- ถามทุกครั้งที่เปิด
+    if not autoFarmEnabled then modeFrame.Visible = true 
     else
         autoFarmEnabled = false
         farmMode = nil
@@ -215,32 +252,22 @@ farmBtn.MouseButton1Click:Connect(function()
 end)
 
 pcBtn.MouseButton1Click:Connect(function()
-    farmMode = "PC"
-    autoFarmEnabled = true
-    modeFrame.Visible = false
-    farmBtn.Text = "AUTO FARM: PC"
-    farmBtn.BackgroundColor3 = Color3.fromRGB(0, 150, 0)
+    farmMode = "PC"; autoFarmEnabled = true; modeFrame.Visible = false
+    farmBtn.Text = "AUTO FARM: PC"; farmBtn.BackgroundColor3 = Color3.fromRGB(200, 100, 0)
 end)
 
 mbBtn.MouseButton1Click:Connect(function()
-    modeFrame.Visible = false
-    tapSetup.Visible = true
-    main.Visible = false -- ซ่อนเมนูหลักชั่วคราวเพื่อตั้งค่า
+    modeFrame.Visible = false; tapSetup.Visible = true; main.Visible = false
 end)
 
 saveTap.MouseButton1Click:Connect(function()
-    mobileClickPos = Vector2.new(tapSetup.AbsolutePosition.X + (tapSetup.AbsoluteSize.X/2), tapSetup.AbsolutePosition.Y + (tapSetup.AbsoluteSize.Y/2))
-    farmMode = "Mobile"
-    autoFarmEnabled = true
-    tapSetup.Visible = false
-    main.Visible = true
-    farmBtn.Text = "AUTO FARM: MOBILE"
-    farmBtn.BackgroundColor3 = Color3.fromRGB(0, 150, 0)
+    mobileClickPos = Vector2.new(tapSetup.AbsolutePosition.X + 30, tapSetup.AbsolutePosition.Y + 30)
+    farmMode = "Mobile"; autoFarmEnabled = true; tapSetup.Visible = false; main.Visible = true
+    farmBtn.Text = "AUTO FARM: MOBILE"; farmBtn.BackgroundColor3 = Color3.fromRGB(200, 100, 0)
 end)
 
 followBtn.MouseButton1Click:Connect(function()
-    isEnabled = not isEnabled
-    updateCharCache()
+    isEnabled = not isEnabled; updateCharCache()
     followBtn.Text = isEnabled and "FOLLOW: ACTIVE" or "FOLLOW: OFF"
     followBtn.BackgroundColor3 = isEnabled and Color3.fromRGB(200, 0, 0) or Color3.fromRGB(30, 30, 30)
     humanoid.PlatformStand = isEnabled
@@ -253,9 +280,14 @@ end)
 
 skipBtn.MouseButton1Click:Connect(function() currentTarget = getNearestPlayer(currentTarget) end)
 
+distInput.FocusLost:Connect(function()
+    followDistance = tonumber(distInput.Text:match("%d+")) or followDistance
+    distInput.Text = "Distance: " .. tostring(followDistance)
+end)
+
 player.CharacterAdded:Connect(function(char)
     character, rootPart, humanoid = char, char:WaitForChild("HumanoidRootPart"), char:WaitForChild("Humanoid")
     updateCharCache()
 end)
 
-print("Reaper Hub V9.1 Loaded")
+print("Reaper Hub V10 Loaded - Full Version")

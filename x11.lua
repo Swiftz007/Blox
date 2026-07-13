@@ -1,3 +1,4 @@
+-- [[ REAPER HUB V8 - AUTO G ADDED ]] --
 local Players = game:GetService("Players")
 local RunService = game:GetService("RunService")
 local UserInputService = game:GetService("UserInputService")
@@ -9,7 +10,7 @@ local character = player.Character or player.CharacterAdded:Wait()
 local rootPart = character:WaitForChild("HumanoidRootPart")
 local humanoid = character:WaitForChild("Humanoid")
 
--- === [ SETTINGS ] === 1
+-- === [ SETTINGS ] ===
 local isEnabled = false
 local autoFarmEnabled = false
 local antiVoidEnabled = true
@@ -91,7 +92,7 @@ img.BackgroundTransparency = 1
 img.Image = "rbxassetid://86279908104891"
 
 local main = Instance.new("Frame", screenGui)
-main.Size = UDim2.new(0, 200, 0, 280) -- เพิ่มความสูงรองรับปุ่ม
+main.Size = UDim2.new(0, 200, 0, 280)
 main.Position = UDim2.new(0.5, -100, 0.5, -140)
 main.BackgroundColor3 = Color3.fromRGB(12, 12, 12)
 Instance.new("UICorner", main).CornerRadius = UDim.new(0, 10)
@@ -115,10 +116,9 @@ local function createBtn(text, pos, color)
     return btn
 end
 
--- Layout: Farm -> Follow -> AntiVoid -> Skip
 local title = Instance.new("TextLabel", main)
 title.Size = UDim2.new(1, 0, 0, 35)
-title.Text = "REAPER HUB V8"
+title.Text = "REAPER HUB V9"
 title.TextColor3 = Color3.fromRGB(255, 255, 255)
 title.Font = Enum.Font.GothamBold
 title.BackgroundTransparency = 1
@@ -138,7 +138,7 @@ Instance.new("UICorner", distInput)
 
 -- === [ FARM LOGIC ] ===
 
--- Click Loop
+-- Click Loop (M1)
 task.spawn(function()
     while true do
         task.wait(0.05)
@@ -169,6 +169,20 @@ task.spawn(function()
     end
 end)
 
+-- Auto G Loop (ทุก 15 วินาที)
+task.spawn(function()
+    while true do
+        if autoFarmEnabled and isEnabled and currentTarget then
+            VirtualInputManager:SendKeyEvent(true, Enum.KeyCode.G, false, game)
+            task.wait(0.05)
+            VirtualInputManager:SendKeyEvent(false, Enum.KeyCode.G, false, game)
+            task.wait(15) -- ดีเลย์ 15 วินาที
+        else
+            task.wait(1)
+        end
+    end
+end)
+
 -- === [ CORE LOOP ] ===
 RunService.Heartbeat:Connect(function()
     if antiVoidEnabled and rootPart and rootPart.Position.Y < voidThreshold then
@@ -181,7 +195,6 @@ RunService.Heartbeat:Connect(function()
         else
             local targetRoot = currentTarget.Character:FindFirstChild("HumanoidRootPart")
             if targetRoot then
-                -- จะอยู่ข้างหลังตลอดเวลาตามเงื่อนไข
                 character:PivotTo(targetRoot.CFrame * CFrame.new(0, 0, followDistance))
                 rootPart.AssemblyLinearVelocity = targetRoot.AssemblyLinearVelocity
                 for _, v in ipairs(charParts) do if v then v.CanCollide = false end end
@@ -224,4 +237,4 @@ player.CharacterAdded:Connect(function(char)
     updateCharCache()
 end)
 
-print("Reaper Loaded")
+print("Reaper Hub V8 Loaded")

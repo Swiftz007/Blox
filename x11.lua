@@ -1,4 +1,4 @@
--- [[ REAPER HUB V10 - HYBRID & FULL GUI ]] --
+-- [[ REAPER HUB V11 - STRICT INITIALIZATION ]] --
 local Players = game:GetService("Players")
 local RunService = game:GetService("RunService")
 local UserInputService = game:GetService("UserInputService")
@@ -9,18 +9,16 @@ local character = player.Character or player.CharacterAdded:Wait()
 local rootPart = character:WaitForChild("HumanoidRootPart")
 local humanoid = character:WaitForChild("Humanoid")
 
--- === [ SETTINGS ] ===
+-- === [ SETTINGS - ALL RESET TO FALSE ] ===
 local isEnabled = false
 local autoFarmEnabled = false
-local antiVoidEnabled = true
+local antiVoidEnabled = true -- ปิดไว้ก่อน
 local currentTarget = nil
 local followDistance = 4
 local voidThreshold = -450 
 local recoveryHeight = 600
 local charParts = {}
-
--- Mobile/PC Logic Variables
-local farmMode = nil -- "PC" or "Mobile"
+local farmMode = nil 
 local mobileClickPos = nil
 
 -- === [ UTILITY ] ===
@@ -75,19 +73,17 @@ end
 
 -- === [ GUI SETUP ] ===
 local screenGui = Instance.new("ScreenGui", player:WaitForChild("PlayerGui"))
-screenGui.Name = "ReaperV10_Final"
+screenGui.Name = "ReaperV11_Strict"
 screenGui.ResetOnSpawn = false
-screenGui.IgnoreGuiInset = true
 
 -- Toggle Logo
 local toggleFrame = Instance.new("Frame", screenGui)
 toggleFrame.Size = UDim2.new(0, 55, 0, 55)
 toggleFrame.Position = UDim2.new(0.05, 0, 0.15, 0)
 toggleFrame.BackgroundColor3 = Color3.fromRGB(15, 15, 15)
-Instance.new("UICorner", toggleFrame).CornerRadius = UDim.new(0, 12)
+Instance.new("UICorner", toggleFrame)
 local tStroke = Instance.new("UIStroke", toggleFrame)
 tStroke.Color = Color3.fromRGB(255, 0, 0)
-tStroke.Thickness = 2
 
 local img = Instance.new("ImageButton", toggleFrame)
 img.Size = UDim2.new(0.8, 0, 0.8, 0)
@@ -101,10 +97,9 @@ main.Size = UDim2.new(0, 200, 0, 280)
 main.Position = UDim2.new(0.5, -100, 0.5, -140)
 main.BackgroundColor3 = Color3.fromRGB(12, 12, 12)
 main.Visible = true
-Instance.new("UICorner", main).CornerRadius = UDim.new(0, 10)
+Instance.new("UICorner", main)
 local stroke = Instance.new("UIStroke", main)
 stroke.Color = Color3.fromRGB(200, 0, 0)
-stroke.Thickness = 2
 
 makeDraggable(img, toggleFrame)
 makeDraggable(main, main)
@@ -122,64 +117,39 @@ local function createBtn(text, pos, color, parent)
     return btn
 end
 
-local title = Instance.new("TextLabel", main)
-title.Size = UDim2.new(1, 0, 0, 35)
-title.Text = "REAPER HUB V10"
-title.TextColor3 = Color3.fromRGB(255, 255, 255)
-title.Font = Enum.Font.GothamBold
-title.BackgroundTransparency = 1
-
 local farmBtn = createBtn("AUTO FARM: OFF", UDim2.new(0.05, 0, 0.15, 0), Color3.fromRGB(30, 30, 30))
 local followBtn = createBtn("FOLLOW: OFF", UDim2.new(0.05, 0, 0.28, 0), Color3.fromRGB(30, 30, 30))
-local antiVoidBtn = createBtn("ANTI-VOID: ON", UDim2.new(0.05, 0, 0.41, 0), Color3.fromRGB(0, 120, 0))
+local antiVoidBtn = createBtn("ANTI-VOID: OFF", UDim2.new(0.05, 0, 0.41, 0), Color3.fromRGB(30, 30, 30))
 local skipBtn = createBtn("SKIP PLAYER", UDim2.new(0.05, 0, 0.54, 0), Color3.fromRGB(120, 0, 0))
 
-local distInput = Instance.new("TextBox", main)
-distInput.Size = UDim2.new(0.9, 0, 0, 30)
-distInput.Position = UDim2.new(0.05, 0, 0.72, 0)
-distInput.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
-distInput.Text = "Distance: " .. tostring(followDistance)
-distInput.TextColor3 = Color3.fromRGB(255, 255, 255)
-Instance.new("UICorner", distInput)
-
--- === [ MODE SELECTION UI ] ===
+-- Mode Selection
 local modeFrame = Instance.new("Frame", screenGui)
 modeFrame.Size = UDim2.new(0, 250, 0, 150)
 modeFrame.Position = UDim2.new(0.5, -125, 0.5, -75)
 modeFrame.BackgroundColor3 = Color3.fromRGB(20, 20, 20)
 modeFrame.Visible = false
 Instance.new("UICorner", modeFrame)
-local mStroke = Instance.new("UIStroke", modeFrame)
-mStroke.Color = Color3.fromRGB(255, 0, 0)
+local pcBtn = createBtn("PC MODE (M1)", UDim2.new(0.05, 0, 0.3, 0), Color3.fromRGB(50, 50, 50), modeFrame)
+local mbBtn = createBtn("MOBILE MODE (TAP)", UDim2.new(0.05, 0, 0.65, 0), Color3.fromRGB(50, 50, 50), modeFrame)
 
-local mTitle = Instance.new("TextLabel", modeFrame)
-mTitle.Size = UDim2.new(1, 0, 0, 40)
-mTitle.Text = "SELECT DEVICE MODE"
-mTitle.TextColor3 = Color3.fromRGB(255, 255, 255)
-mTitle.BackgroundTransparency = 1
-
-local pcBtn = createBtn("PC (MOUSE 1)", UDim2.new(0.05, 0, 0.35, 0), Color3.fromRGB(50, 50, 50), modeFrame)
-local mbBtn = createBtn("MOBILE (TAP POS)", UDim2.new(0.05, 0, 0.65, 0), Color3.fromRGB(50, 50, 50), modeFrame)
-
--- === [ MOBILE TAP SETUP ] ===
+-- Mobile Tap Setup
 local tapSetup = Instance.new("Frame", screenGui)
 tapSetup.Size = UDim2.new(0, 60, 0, 60)
-tapSetup.Position = UDim2.new(0.8, 0, 0.8, 0)
 tapSetup.BackgroundColor3 = Color3.fromRGB(255, 0, 0)
 tapSetup.BackgroundTransparency = 0.5
 tapSetup.Visible = false
 Instance.new("UICorner", tapSetup).CornerRadius = UDim.new(1, 0)
 makeDraggable(tapSetup, tapSetup)
-
-local saveTap = createBtn("SAVE POS", UDim2.new(0, 100, 0, 35), UDim2.new(0.5, -50, 1.1, 0), Color3.fromRGB(0, 150, 0), tapSetup)
+local saveTap = createBtn("SAVE POS", UDim2.new(0, 100, 0, 30), UDim2.new(0.5, -50, 1.2, 0), Color3.fromRGB(0, 150, 0), tapSetup)
 
 -- === [ LOOPS ] ===
 
--- Hybrid Click (PC M1 / Mobile Tap)
+-- Click Loop (Hybrid)
 task.spawn(function()
     while true do
         task.wait(0.05)
-        if autoFarmEnabled and isEnabled and currentTarget and farmMode then
+        -- เช็คเงื่อนไขอย่างเข้มงวด: ต้องเปิดฟาร์ม + เปิดติดตาม + มีเป้าหมาย และเมนูต้องปิดอยู่
+        if autoFarmEnabled and isEnabled and currentTarget and farmMode and not main.Visible and not modeFrame.Visible then
             if farmMode == "PC" then
                 VirtualInputManager:SendMouseButtonEvent(0, 0, 0, true, game, 0)
                 task.wait(0.01)
@@ -193,40 +163,35 @@ task.spawn(function()
     end
 end)
 
--- Auto G (15 Seconds)
+-- Skill & G Loop
 task.spawn(function()
+    local lastG = tick()
     while true do
-        task.wait(15)
-        if autoFarmEnabled and isEnabled and currentTarget then
-            VirtualInputManager:SendKeyEvent(true, Enum.KeyCode.G, false, game)
-            task.wait(0.05)
-            VirtualInputManager:SendKeyEvent(false, Enum.KeyCode.G, false, game)
-        end
-    end
-end)
-
--- Skill Rotation (1,2,3,4)
-task.spawn(function()
-    local keys = {Enum.KeyCode.One, Enum.KeyCode.Two, Enum.KeyCode.Three, Enum.KeyCode.Four}
-    while true do
-        for _, key in ipairs(keys) do
-            if autoFarmEnabled and isEnabled and currentTarget then
-                VirtualInputManager:SendKeyEvent(true, key, false, game)
+        task.wait(0.1)
+        if autoFarmEnabled and isEnabled and currentTarget and not main.Visible then
+            -- Skills 1-4
+            local skills = {"One", "Two", "Three", "Four"}
+            for _, k in ipairs(skills) do
+                if not autoFarmEnabled then break end
+                VirtualInputManager:SendKeyEvent(true, Enum.KeyCode[k], false, game)
                 task.wait(0.05)
-                VirtualInputManager:SendKeyEvent(false, key, false, game)
+                VirtualInputManager:SendKeyEvent(false, Enum.KeyCode[k], false, game)
                 task.wait(1)
-            else task.wait(0.5) break end
+            end
+            -- G (15s)
+            if tick() - lastG >= 15 then
+                VirtualInputManager:SendKeyEvent(true, Enum.KeyCode.G, false, game)
+                task.wait(0.05)
+                VirtualInputManager:SendKeyEvent(false, Enum.KeyCode.G, false, game)
+                lastG = tick()
+            end
         end
     end
 end)
 
 -- Core Follow & Anti-Void
 RunService.Heartbeat:Connect(function()
-    if antiVoidEnabled and rootPart and rootPart.Position.Y < voidThreshold then
-        rootPart.CFrame = CFrame.new(rootPart.Position.X, recoveryHeight, rootPart.Position.Z)
-        rootPart.AssemblyLinearVelocity = Vector3.new(0,0,0)
-    end
-    if isEnabled then
+    if isEnabled and rootPart then
         if not currentTarget or not currentTarget.Character or not currentTarget.Character:FindFirstChild("Humanoid") or currentTarget.Character.Humanoid.Health <= 0 then
             currentTarget = getNearestPlayer()
         else
@@ -238,11 +203,17 @@ RunService.Heartbeat:Connect(function()
             end
         end
     end
+    
+    if antiVoidEnabled and rootPart and rootPart.Position.Y < voidThreshold then
+        rootPart.CFrame = CFrame.new(rootPart.Position.X, recoveryHeight, rootPart.Position.Z)
+        rootPart.AssemblyLinearVelocity = Vector3.new(0,0,0)
+    end
 end)
 
 -- === [ EVENTS ] ===
 farmBtn.MouseButton1Click:Connect(function()
-    if not autoFarmEnabled then modeFrame.Visible = true 
+    if not autoFarmEnabled then 
+        modeFrame.Visible = true 
     else
         autoFarmEnabled = false
         farmMode = nil
@@ -268,7 +239,7 @@ end)
 
 followBtn.MouseButton1Click:Connect(function()
     isEnabled = not isEnabled; updateCharCache()
-    followBtn.Text = isEnabled and "FOLLOW: ACTIVE" or "FOLLOW: OFF"
+    followBtn.Text = isEnabled and "FOLLOW: ON" or "FOLLOW: OFF"
     followBtn.BackgroundColor3 = isEnabled and Color3.fromRGB(200, 0, 0) or Color3.fromRGB(30, 30, 30)
     humanoid.PlatformStand = isEnabled
 end)
@@ -276,18 +247,14 @@ end)
 antiVoidBtn.MouseButton1Click:Connect(function()
     antiVoidEnabled = not antiVoidEnabled
     antiVoidBtn.Text = antiVoidEnabled and "ANTI-VOID: ON" or "ANTI-VOID: OFF"
+    antiVoidBtn.BackgroundColor3 = antiVoidEnabled and Color3.fromRGB(0, 150, 0) or Color3.fromRGB(30, 30, 30)
 end)
 
 skipBtn.MouseButton1Click:Connect(function() currentTarget = getNearestPlayer(currentTarget) end)
-
-distInput.FocusLost:Connect(function()
-    followDistance = tonumber(distInput.Text:match("%d+")) or followDistance
-    distInput.Text = "Distance: " .. tostring(followDistance)
-end)
 
 player.CharacterAdded:Connect(function(char)
     character, rootPart, humanoid = char, char:WaitForChild("HumanoidRootPart"), char:WaitForChild("Humanoid")
     updateCharCache()
 end)
 
-print("Reaper Hub V10 Loaded - Full Version")
+print("Reaper V11 Loaded - Strict Mode")

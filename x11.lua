@@ -1,7 +1,8 @@
--- [[ REAPER HUB V11 - STRICT INITIALIZATION ]] --
+-- [[ REAPER HUB V8 - AUTO G ADDED ]] --
 local Players = game:GetService("Players")
 local RunService = game:GetService("RunService")
 local UserInputService = game:GetService("UserInputService")
+local VirtualUser = game:GetService("VirtualUser")
 local VirtualInputManager = game:GetService("VirtualInputManager")
 
 local player = Players.LocalPlayer
@@ -9,17 +10,15 @@ local character = player.Character or player.CharacterAdded:Wait()
 local rootPart = character:WaitForChild("HumanoidRootPart")
 local humanoid = character:WaitForChild("Humanoid")
 
--- === [ SETTINGS - ALL RESET TO FALSE ] ===
+-- === [ SETTINGS ] ===
 local isEnabled = false
 local autoFarmEnabled = false
-local antiVoidEnabled = true -- ปิดไว้ก่อน
+local antiVoidEnabled = true
 local currentTarget = nil
 local followDistance = 4
 local voidThreshold = -450 
 local recoveryHeight = 600
 local charParts = {}
-local farmMode = nil 
-local mobileClickPos = nil
 
 -- === [ UTILITY ] ===
 local function updateCharCache()
@@ -47,7 +46,7 @@ local function getNearestPlayer(exclude)
     return closestPlayer
 end
 
--- === [ DRAGGABLE SYSTEM ] ===
+-- === [ DRAGGABLE ] ===
 local function makeDraggable(clickObject, targetFrame)
     local dragging, dragInput, dragStart, startPos
     clickObject.InputBegan:Connect(function(input)
@@ -73,17 +72,18 @@ end
 
 -- === [ GUI SETUP ] ===
 local screenGui = Instance.new("ScreenGui", player:WaitForChild("PlayerGui"))
-screenGui.Name = "ReaperV11_Strict"
+screenGui.Name = "ReaperPro"
 screenGui.ResetOnSpawn = false
+screenGui.DisplayOrder = 99999999
 
--- Toggle Logo
 local toggleFrame = Instance.new("Frame", screenGui)
-toggleFrame.Size = UDim2.new(0, 55, 0, 55)
-toggleFrame.Position = UDim2.new(0.05, 0, 0.15, 0)
+toggleFrame.Size = UDim2.new(0, 50, 0, 50)
+toggleFrame.Position = UDim2.new(0.05, 0, 0.2, 0)
 toggleFrame.BackgroundColor3 = Color3.fromRGB(15, 15, 15)
-Instance.new("UICorner", toggleFrame)
+Instance.new("UICorner", toggleFrame).CornerRadius = UDim.new(0, 12)
 local tStroke = Instance.new("UIStroke", toggleFrame)
-tStroke.Color = Color3.fromRGB(255, 0, 0)
+tStroke.Color = Color3.fromRGB(200, 0, 0)
+tStroke.Thickness = 2
 
 local img = Instance.new("ImageButton", toggleFrame)
 img.Size = UDim2.new(0.8, 0, 0.8, 0)
@@ -91,107 +91,105 @@ img.Position = UDim2.new(0.1, 0, 0.1, 0)
 img.BackgroundTransparency = 1
 img.Image = "rbxassetid://86279908104891"
 
--- Main Frame
 local main = Instance.new("Frame", screenGui)
 main.Size = UDim2.new(0, 200, 0, 280)
 main.Position = UDim2.new(0.5, -100, 0.5, -140)
 main.BackgroundColor3 = Color3.fromRGB(12, 12, 12)
-main.Visible = true
-Instance.new("UICorner", main)
+Instance.new("UICorner", main).CornerRadius = UDim.new(0, 10)
 local stroke = Instance.new("UIStroke", main)
 stroke.Color = Color3.fromRGB(200, 0, 0)
+stroke.Thickness = 2
 
 makeDraggable(img, toggleFrame)
 makeDraggable(main, main)
 img.MouseButton1Click:Connect(function() main.Visible = not main.Visible end)
 
-local function createBtn(text, pos, color, parent)
-    local btn = Instance.new("TextButton", parent or main)
+local function createBtn(text, pos, color)
+    local btn = Instance.new("TextButton", main)
     btn.Size = UDim2.new(0.9, 0, 0, 32)
     btn.Position = pos
     btn.BackgroundColor3 = color
     btn.Text = text
     btn.TextColor3 = Color3.fromRGB(255, 255, 255)
-    btn.Font = Enum.Font.GothamBold
+    btn.Font = Enum.Font.GothamMedium
     Instance.new("UICorner", btn)
     return btn
 end
 
+local title = Instance.new("TextLabel", main)
+title.Size = UDim2.new(1, 0, 0, 35)
+title.Text = "REAPER HUB V8"
+title.TextColor3 = Color3.fromRGB(255, 255, 255)
+title.Font = Enum.Font.GothamBold
+title.BackgroundTransparency = 1
+
 local farmBtn = createBtn("AUTO FARM: OFF", UDim2.new(0.05, 0, 0.15, 0), Color3.fromRGB(30, 30, 30))
 local followBtn = createBtn("FOLLOW: OFF", UDim2.new(0.05, 0, 0.28, 0), Color3.fromRGB(30, 30, 30))
-local antiVoidBtn = createBtn("ANTI-VOID: OFF", UDim2.new(0.05, 0, 0.41, 0), Color3.fromRGB(30, 30, 30))
+local antiVoidBtn = createBtn("ANTI-VOID: ON", UDim2.new(0.05, 0, 0.41, 0), Color3.fromRGB(0, 120, 0))
 local skipBtn = createBtn("SKIP PLAYER", UDim2.new(0.05, 0, 0.54, 0), Color3.fromRGB(120, 0, 0))
 
--- Mode Selection
-local modeFrame = Instance.new("Frame", screenGui)
-modeFrame.Size = UDim2.new(0, 250, 0, 150)
-modeFrame.Position = UDim2.new(0.5, -125, 0.5, -75)
-modeFrame.BackgroundColor3 = Color3.fromRGB(20, 20, 20)
-modeFrame.Visible = false
-Instance.new("UICorner", modeFrame)
-local pcBtn = createBtn("PC MODE (M1)", UDim2.new(0.05, 0, 0.3, 0), Color3.fromRGB(50, 50, 50), modeFrame)
-local mbBtn = createBtn("MOBILE MODE (TAP)", UDim2.new(0.05, 0, 0.65, 0), Color3.fromRGB(50, 50, 50), modeFrame)
+local distInput = Instance.new("TextBox", main)
+distInput.Size = UDim2.new(0.9, 0, 0, 30)
+distInput.Position = UDim2.new(0.05, 0, 0.72, 0)
+distInput.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
+distInput.Text = "Distance: " .. tostring(followDistance)
+distInput.TextColor3 = Color3.fromRGB(255, 255, 255)
+Instance.new("UICorner", distInput)
 
--- Mobile Tap Setup
-local tapSetup = Instance.new("Frame", screenGui)
-tapSetup.Size = UDim2.new(0, 60, 0, 60)
-tapSetup.BackgroundColor3 = Color3.fromRGB(255, 0, 0)
-tapSetup.BackgroundTransparency = 0.5
-tapSetup.Visible = false
-Instance.new("UICorner", tapSetup).CornerRadius = UDim.new(1, 0)
-makeDraggable(tapSetup, tapSetup)
-local saveTap = createBtn("SAVE POS", UDim2.new(0, 100, 0, 30), UDim2.new(0.5, -50, 1.2, 0), Color3.fromRGB(0, 150, 0), tapSetup)
+-- === [ FARM LOGIC ] ===
 
--- === [ LOOPS ] ===
-
--- Click Loop (Hybrid)
+-- Click Loop (M1)
 task.spawn(function()
     while true do
         task.wait(0.05)
-        -- เช็คเงื่อนไขอย่างเข้มงวด: ต้องเปิดฟาร์ม + เปิดติดตาม + มีเป้าหมาย และเมนูต้องปิดอยู่
-        if autoFarmEnabled and isEnabled and currentTarget and farmMode and not main.Visible and not modeFrame.Visible then
-            if farmMode == "PC" then
-                VirtualInputManager:SendMouseButtonEvent(0, 0, 0, true, game, 0)
-                task.wait(0.01)
-                VirtualInputManager:SendMouseButtonEvent(0, 0, 0, false, game, 0)
-            elseif farmMode == "Mobile" and mobileClickPos then
-                VirtualInputManager:SendTouchEvent(mobileClickPos.X, mobileClickPos.Y, Enum.UserInputState.Begin, game)
-                task.wait(0.01)
-                VirtualInputManager:SendTouchEvent(mobileClickPos.X, mobileClickPos.Y, Enum.UserInputState.End, game)
-            end
+        if autoFarmEnabled and isEnabled and currentTarget then
+            VirtualUser:CaptureController()
+            VirtualUser:Button1Down(Vector2.new(0,0))
+            task.wait(0.01)
+            VirtualUser:Button1Up(Vector2.new(0,0))
         end
     end
 end)
 
--- Skill & G Loop
+-- Skill Loop (1, 2, 3, 4)
 task.spawn(function()
-    local lastG = tick()
+    local keys = {Enum.KeyCode.One, Enum.KeyCode.Two, Enum.KeyCode.Three, Enum.KeyCode.Four}
     while true do
-        task.wait(0.1)
-        if autoFarmEnabled and isEnabled and currentTarget and not main.Visible then
-            -- Skills 1-4
-            local skills = {"One", "Two", "Three", "Four"}
-            for _, k in ipairs(skills) do
-                if not autoFarmEnabled then break end
-                VirtualInputManager:SendKeyEvent(true, Enum.KeyCode[k], false, game)
+        for _, key in ipairs(keys) do
+            if autoFarmEnabled and isEnabled and currentTarget then
+                VirtualInputManager:SendKeyEvent(true, key, false, game)
                 task.wait(0.05)
-                VirtualInputManager:SendKeyEvent(false, Enum.KeyCode[k], false, game)
+                VirtualInputManager:SendKeyEvent(false, key, false, game)
                 task.wait(1)
-            end
-            -- G (15s)
-            if tick() - lastG >= 15 then
-                VirtualInputManager:SendKeyEvent(true, Enum.KeyCode.G, false, game)
-                task.wait(0.05)
-                VirtualInputManager:SendKeyEvent(false, Enum.KeyCode.G, false, game)
-                lastG = tick()
+            else
+                task.wait(0.5)
+                break
             end
         end
     end
 end)
 
--- Core Follow & Anti-Void
+-- Auto G Loop (ทุก 15 วินาที)
+task.spawn(function()
+    while true do
+        if autoFarmEnabled and isEnabled and currentTarget then
+            VirtualInputManager:SendKeyEvent(true, Enum.KeyCode.G, false, game)
+            task.wait(0.05)
+            VirtualInputManager:SendKeyEvent(false, Enum.KeyCode.G, false, game)
+            task.wait(15) -- ดีเลย์ 15 วินาที
+        else
+            task.wait(1)
+        end
+    end
+end)
+
+-- === [ CORE LOOP ] ===
 RunService.Heartbeat:Connect(function()
-    if isEnabled and rootPart then
+    if antiVoidEnabled and rootPart and rootPart.Position.Y < voidThreshold then
+        rootPart.AssemblyLinearVelocity = Vector3.new(0,0,0)
+        rootPart.CFrame = CFrame.new(rootPart.Position.X, recoveryHeight, rootPart.Position.Z)
+    end
+    if isEnabled then
         if not currentTarget or not currentTarget.Character or not currentTarget.Character:FindFirstChild("Humanoid") or currentTarget.Character.Humanoid.Health <= 0 then
             currentTarget = getNearestPlayer()
         else
@@ -203,58 +201,40 @@ RunService.Heartbeat:Connect(function()
             end
         end
     end
-    
-    if antiVoidEnabled and rootPart and rootPart.Position.Y < voidThreshold then
-        rootPart.CFrame = CFrame.new(rootPart.Position.X, recoveryHeight, rootPart.Position.Z)
-        rootPart.AssemblyLinearVelocity = Vector3.new(0,0,0)
-    end
 end)
 
--- === [ EVENTS ] ===
+-- === [ BUTTON EVENTS ] ===
 farmBtn.MouseButton1Click:Connect(function()
-    if not autoFarmEnabled then 
-        modeFrame.Visible = true 
-    else
-        autoFarmEnabled = false
-        farmMode = nil
-        farmBtn.Text = "AUTO FARM: OFF"
-        farmBtn.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
-    end
-end)
-
-pcBtn.MouseButton1Click:Connect(function()
-    farmMode = "PC"; autoFarmEnabled = true; modeFrame.Visible = false
-    farmBtn.Text = "AUTO FARM: PC"; farmBtn.BackgroundColor3 = Color3.fromRGB(200, 100, 0)
-end)
-
-mbBtn.MouseButton1Click:Connect(function()
-    modeFrame.Visible = false; tapSetup.Visible = true; main.Visible = false
-end)
-
-saveTap.MouseButton1Click:Connect(function()
-    mobileClickPos = Vector2.new(tapSetup.AbsolutePosition.X + 30, tapSetup.AbsolutePosition.Y + 30)
-    farmMode = "Mobile"; autoFarmEnabled = true; tapSetup.Visible = false; main.Visible = true
-    farmBtn.Text = "AUTO FARM: MOBILE"; farmBtn.BackgroundColor3 = Color3.fromRGB(200, 100, 0)
+    autoFarmEnabled = not autoFarmEnabled
+    farmBtn.Text = autoFarmEnabled and "AUTO FARM: ON" or "AUTO FARM: OFF"
+    farmBtn.BackgroundColor3 = autoFarmEnabled and Color3.fromRGB(200, 100, 0) or Color3.fromRGB(30, 30, 30)
 end)
 
 followBtn.MouseButton1Click:Connect(function()
-    isEnabled = not isEnabled; updateCharCache()
-    followBtn.Text = isEnabled and "FOLLOW: ON" or "FOLLOW: OFF"
+    isEnabled = not isEnabled
+    updateCharCache()
+    followBtn.Text = isEnabled and "FOLLOW: ACTIVE" or "FOLLOW: OFF"
     followBtn.BackgroundColor3 = isEnabled and Color3.fromRGB(200, 0, 0) or Color3.fromRGB(30, 30, 30)
     humanoid.PlatformStand = isEnabled
+    if not isEnabled then for _, v in ipairs(charParts) do if v then v.CanCollide = true end end end
 end)
 
 antiVoidBtn.MouseButton1Click:Connect(function()
     antiVoidEnabled = not antiVoidEnabled
     antiVoidBtn.Text = antiVoidEnabled and "ANTI-VOID: ON" or "ANTI-VOID: OFF"
-    antiVoidBtn.BackgroundColor3 = antiVoidEnabled and Color3.fromRGB(0, 150, 0) or Color3.fromRGB(30, 30, 30)
+    antiVoidBtn.BackgroundColor3 = antiVoidEnabled and Color3.fromRGB(0, 120, 0) or Color3.fromRGB(30, 30, 30)
 end)
 
 skipBtn.MouseButton1Click:Connect(function() currentTarget = getNearestPlayer(currentTarget) end)
+
+distInput.FocusLost:Connect(function()
+    followDistance = tonumber(distInput.Text:match("%d+")) or followDistance
+    distInput.Text = "Distance: " .. tostring(followDistance)
+end)
 
 player.CharacterAdded:Connect(function(char)
     character, rootPart, humanoid = char, char:WaitForChild("HumanoidRootPart"), char:WaitForChild("Humanoid")
     updateCharCache()
 end)
 
-print("Reaper V11 Loaded - Strict Mode")
+print("Reaper Hub V8 Loaded")
